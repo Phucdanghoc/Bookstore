@@ -1,0 +1,30 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+
+# Build outputs
+dist/
+out/
+.next/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# Editor settings
+.vscode/
+.idea/
+.DS_Store
+
+# AWS and Docker
+.aws/
+.dockerignore
+docker-compose.override.yml

@@ -1,0 +1,212 @@
+[
+    {
+      "title": "Sapiens: Lược sử loài người",
+      "author": "Yuval Noah Harari",
+      "price": 250000,
+      "category": "History",
+      "stock": 10,
+      "pages": 512,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2019-08-15"
+    },
+    {
+      "title": "Homo Deus: Lược sử tương lai",
+      "author": "Yuval Noah Harari",
+      "price": 260000,
+      "category": "Science",
+      "stock": 15,
+      "pages": 448,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2020-03-12"
+    },
+    {
+      "title": "Đắc nhân tâm",
+      "author": "Dale Carnegie",
+      "price": 99000,
+      "category": "Self-help",
+      "stock": 20,
+      "pages": 320,
+      "images": [],
+      "publisher": "NXB Trẻ",
+      "publication_date": "2018-09-10"
+    },
+    {
+      "title": "Nhà giả kim",
+      "author": "Paulo Coelho",
+      "price": 89000,
+      "category": "Fiction",
+      "stock": 12,
+      "pages": 208,
+      "images": [],
+      "publisher": "NXB Văn Học",
+      "publication_date": "2021-01-20"
+    },
+    {
+      "title": "Bố già",
+      "author": "Mario Puzo",
+      "price": 195000,
+      "category": "Fiction",
+      "stock": 8,
+      "pages": 600,
+      "images": [],
+      "publisher": "NXB Văn Học",
+      "publication_date": "2019-05-05"
+    },
+    {
+      "title": "7 Thói quen hiệu quả",
+      "author": "Stephen R. Covey",
+      "price": 210000,
+      "category": "Self-help",
+      "stock": 18,
+      "pages": 432,
+      "images": [],
+      "publisher": "NXB Tổng Hợp",
+      "publication_date": "2020-10-18"
+    },
+    {
+      "title": "Trí tuệ Do Thái",
+      "author": "Eran Katz",
+      "price": 125000,
+      "category": "Self-help",
+      "stock": 14,
+      "pages": 350,
+      "images": [],
+      "publisher": "NXB Lao Động",
+      "publication_date": "2017-06-22"
+    },
+    {
+      "title": "Thiên tài bên trái, kẻ điên bên phải",
+      "author": "Nhĩ Đông Thăng",
+      "price": 190000,
+      "category": "Psychology",
+      "stock": 10,
+      "pages": 320,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2021-07-15"
+    },
+    {
+      "title": "Tư duy nhanh và chậm",
+      "author": "Daniel Kahneman",
+      "price": 280000,
+      "category": "Psychology",
+      "stock": 7,
+      "pages": 600,
+      "images": [],
+      "publisher": "NXB Tri Thức",
+      "publication_date": "2022-02-25"
+    },
+    {
+      "title": "Súng, vi trùng và thép",
+      "author": "Jared Diamond",
+      "price": 270000,
+      "category": "Science",
+      "stock": 9,
+      "pages": 700,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2019-11-30"
+    },
+    {
+      "title": "Những người khốn khổ",
+      "author": "Victor Hugo",
+      "price": 350000,
+      "category": "Fiction",
+      "stock": 6,
+      "pages": 1200,
+      "images": [],
+      "publisher": "NXB Văn Học",
+      "publication_date": "2016-03-15"
+    },
+    {
+      "title": "Chiến tranh tiền tệ",
+      "author": "Song Hongbing",
+      "price": 200000,
+      "category": "Economics",
+      "stock": 11,
+      "pages": 500,
+      "images": [],
+      "publisher": "NXB Lao Động",
+      "publication_date": "2018-12-10"
+    },
+    {
+      "title": "Thế giới phẳng",
+      "author": "Thomas L. Friedman",
+      "price": 180000,
+      "category": "Economics",
+      "stock": 13,
+      "pages": 700,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2017-05-20"
+    },
+    {
+      "title": "Cách mạng công nghiệp 4.0",
+      "author": "Klaus Schwab",
+      "price": 165000,
+      "category": "Technology",
+      "stock": 9,
+      "pages": 250,
+      "images": [],
+      "publisher": "NXB Trẻ",
+      "publication_date": "2021-06-14"
+    },
+    {
+      "title": "Lược sử thời gian",
+      "author": "Stephen Hawking",
+      "price": 150000,
+      "category": "Science",
+      "stock": 12,
+      "pages": 256,
+      "images": [],
+      "publisher": "NXB Khoa Học",
+      "publication_date": "2020-01-08"
+    },
+    {
+      "title": "Mật mã Da Vinci",
+      "author": "Dan Brown",
+      "price": 230000,
+      "category": "Fiction",
+      "stock": 10,
+      "pages": 689,
+      "images": [],
+      "publisher": "NXB Văn Học",
+      "publication_date": "2015-10-15"
+    },
+    {
+      "title": "Trại súc vật",
+      "author": "George Orwell",
+      "price": 95000,
+      "category": "Fiction",
+      "stock": 20,
+      "pages": 250,
+      "images": [],
+      "publisher": "NXB Văn Học",
+      "publication_date": "2022-04-22"
+    },
+    {
+      "title": "1984",
+      "author": "George Orwell",
+      "price": 99000,
+      "category": "Fiction",
+      "stock": 15,
+      "pages": 350,
+      "images": [],
+      "publisher": "NXB Thế Giới",
+      "publication_date": "2018-08-05"
+    },
+    {
+      "title": "Vì sao chúng ta ngủ",
+      "author": "Matthew Walker",
+      "price": 220000,
+      "category": "Health",
+      "stock": 9,
+      "pages": 400,
+      "images": [],
+      "publisher": "NXB Khoa Học",
+      "publication_date": "2021-02-28"
+    }
+  ]
+  

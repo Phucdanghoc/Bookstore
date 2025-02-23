@@ -1,0 +1,225 @@
+import { useEffect, useState } from "react";
+import { X, Plus, Trash2, Loader2 } from "lucide-react";
+import { BookData } from "../../../interfaces/BookData";
+import BookServices from "../../../services/BookServices";
+
+interface AddBookModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (bookData: BookData) => void;
+}
+
+
+const categorySuggestions = ["Fiction", "Non-fiction", "Science"];
+
+export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
+  const [isLoading, setIsLoading] = useState(false); // ✅ Thêm state loading
+  const [book, setBook] = useState<BookData>({
+    _id: "",
+    title: "",
+    author: "",
+    price: 0,
+    category: "",
+    stock: 0,
+    pages: 0,
+    images: [],
+    publisher: "",
+    publication_date: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setBook((prev) => ({
+      ...prev,
+      [name]: name === "price" || name === "stock" || name === "pages" ? Number(value) : value,
+    }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages = Array.from(files).slice(0, 5 - book.images.length).map(file => URL.createObjectURL(file));
+      setBook((prev) => ({ ...prev, images: [...prev.images, ...newImages] }));
+    }
+  };
+
+  const handleCategoryClick = (category: string) => {
+    setBook((prev) => ({ ...prev, category }));
+  };
+
+  const removeImage = (index: number) => {
+    setBook((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true); // ✅ Bắt đầu loading
+
+    try {
+      const bookData = {
+        title: book.title,
+        author: book.author,
+        price: book.price,
+        category: book.category,
+        stock: book.stock,
+        pages: book.pages,
+        publisher: book.publisher,
+        publication_date: book.publication_date,
+      };
+
+      const newBook = await BookServices.createBook(bookData);
+      if (book.images.length > 0) {
+        const imageFiles = await Promise.all(
+          book.images.map(async (image) => {
+            const res = await fetch(image);
+            const blob = await res.blob();
+            return new File([blob], `image-${Date.now()}.png`, { type: blob.type });
+          })
+        );
+        const response = await BookServices.uploadImages(newBook._id, imageFiles);
+        if (response.success) {
+          console.log("📸 Images Uploaded");
+          setIsLoading(false);
+
+        } else {
+          console.error("🚨 Error:", response);
+          setIsLoading(false);
+
+        }
+        console.log("📸 Images Uploaded");
+      }
+      onClose();
+    } catch (error) {
+      setIsLoading(false);
+      console.error("🚨 Error:", error);
+
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setBook({
+        _id: "",
+        title: "",
+        author: "",
+        price: 0,
+        category: "",
+        stock: 0,
+        pages: 0,
+        images: [],
+        publisher: "",
+        publication_date: "",
+      });
+    }
+  }, [isOpen]);
+
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-lg max-w-3xl w-full p-8 relative">
+        <div className="flex items-center justify-between border-b pb-4 mb-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-4 rounded-t-xl">
+          <h2 className="text-2xl font-bold">📚 Thêm Sách Mới</h2>
+          <button onClick={onClose} className="text-white hover:text-red-300 transition">
+            <X size={28} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto no-scrollbar">
+          <div>
+            <label className="block text-sm font-medium">Tiêu đề</label>
+            <input type="text" name="title" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium">Tác giả</label>
+              <input type="text" name="author" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Giá</label>
+              <input type="number" name="price" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium">Nhà xuất bản</label>
+              <input type="text" name="publisher" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Thể loại</label>
+              <input type="text" name="category" className="w-full p-3 border rounded-lg" value={book.category} onChange={handleChange} required />
+              <div className="flex gap-2 mt-2">
+                {categorySuggestions.map((cat) => (
+                  <button key={cat} type="button" className="px-4 py-2 border rounded-full bg-gray-100 hover:bg-gray-200" onClick={() => handleCategoryClick(cat)}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium">Số lượng</label>
+              <input type="number" name="stock" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Số trang</label>
+              <input type="number" name="pages" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Ngày xuất bản</label>
+              <input
+                type="date"
+                name="publication_date"
+                className="w-full p-3 border rounded-lg"
+                value={book.publication_date}
+                onChange={handleChange}
+                required
+
+                placeholder="YYYY-MM-DD"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Hình ảnh</label>
+            <div className="grid grid-cols-6 gap-2">
+              {book.images.map((image, index) => (
+                <div key={index} className="relative w-20 h-20 border rounded-lg overflow-hidden">
+                  <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                  <button onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              {book.images.length < 5 && (
+                <label className="w-20 h-20 border-2 border-dashed flex items-center justify-center cursor-pointer">
+                  <Plus size={24} className="text-gray-400" />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} multiple />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 size={24} className="animate-spin" />
+            ) : (
+              "Thêm mới"
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

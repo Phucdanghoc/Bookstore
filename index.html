@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video với Canvas Filter</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .controls label {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay loop muted>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Trình duyệt của bạn không hỗ trợ video.
+    </video>
+    <canvas id="filterCanvas"></canvas>
+
+    <!-- Điều khiển filter -->
+    <div class="controls">
+        <label>Blur: <span id="blurValue">10</span>px</label>
+        <input type="range" id="blurRange" min="0" max="50" value="10">
+        
+        <label>Hue Rotate: <span id="hueValue">90</span>°</label>
+        <input type="range" id="hueRange" min="0" max="360" value="90">
+
+        <label>Contrast: <span id="contrastValue">100</span>%</label>
+        <input type="range" id="contrastRange" min="0" max="200" value="100">
+
+        <label>Saturation: <span id="saturationValue">100</span>%</label>
+        <input type="range" id="saturationRange" min="0" max="200" value="100">
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("filterCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Lấy input từ người dùng
+        const blurRange = document.getElementById("blurRange");
+        const hueRange = document.getElementById("hueRange");
+        const blurValue = document.getElementById("blurValue");
+        const hueValue = document.getElementById("hueValue");
+        const contrastRange = document.getElementById("contrastRange");
+        const contrastValue = document.getElementById("contrastValue");
+        const saturationRange = document.getElementById("saturationRange");
+        const saturationValue = document.getElementById("saturationValue");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function applyFilter() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa frame trước
+
+            // Lấy giá trị từ thanh trượt
+            const blurAmount = blurRange.value;
+            const hueAmount = hueRange.value;
+
+            // Cập nhật hiển thị giá trị
+            blurValue.innerText = blurAmount;
+            hueValue.innerText = hueAmount;
+
+            // Áp dụng bộ lọc
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; // Lớp phủ tối
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.filter = `blur(${blurAmount}px) hue-rotate(${hueAmount}deg) contrast(${contrastRange.value}%) saturate(${saturationRange.value}%)`; // Cập nhật filter
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            requestAnimationFrame(applyFilter); // Cập nhật liên tục
+        }
+
+        video.addEventListener("play", () => {
+            applyFilter(); // Bắt đầu hiệu ứng khi video chạy
+        });
+    </script>
+</body>
+</html>

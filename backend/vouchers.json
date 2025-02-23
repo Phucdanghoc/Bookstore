@@ -1,0 +1,12 @@
+[
+    { "code": "DISCOUNT10", "discount": 10000, "min_order_value": 50000, "expired_date": "2025-03-01", "status": "active" },
+    { "code": "DISCOUNT15", "discount": 15000, "min_order_value": 70000, "expired_date": "2025-04-15", "status": "active" },
+    { "code": "SALE20", "discount": 20000, "min_order_value": 100000, "expired_date": "2025-05-10", "status": "active" },
+    { "code": "SAVE25", "discount": 25000, "min_order_value": 120000, "expired_date": "2025-06-01", "status": "active" },
+    { "code": "LUCKY30", "discount": 30000, "min_order_value": 150000, "expired_date": "2025-07-20", "status": "active" },
+    { "code": "BIGSALE35", "discount": 35000, "min_order_value": 180000, "expired_date": "2025-08-05", "status": "active" },
+    { "code": "HAPPY40", "discount": 40000, "min_order_value": 200000, "expired_date": "2025-09-15", "status": "active" },
+    { "code": "FESTIVE45", "discount": 45000, "min_order_value": 250000, "expired_date": "2025-10-30", "status": "active" },
+    { "code": "YEAR50", "discount": 50000, "min_order_value": 300000, "expired_date": "2025-12-31", "status": "active" },
+    { "code": "EXCLUSIVE60", "discount": 60000, "min_order_value": 350000, "expired_date": "2026-01-20", "status": "active" }
+]
