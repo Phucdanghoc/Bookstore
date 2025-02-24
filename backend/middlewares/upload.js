@@ -5,7 +5,7 @@
             cb(null, 'uploads/'); 
         },
         filename: (req, file, cb) => {
-            cb(null, `${req.params.id}_${Date.now()}.jpg`); // Tên file = ID sách
+            cb(null, `${req.params.id}_${Date.now()}.jpg`); 
         },
     });
     const upload = multer({
@@ -17,5 +17,5 @@
             }
             cb(null, true);
         },
-    }).array('images', 5); // Tối đa 5 ảnh
+    }).array('images', 5); 
     module.exports = upload;

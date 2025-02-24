@@ -1,0 +1,50 @@
+[{
+  "_id": {
+    "$oid": "678cf04486ae3ebca8dca0e8"
+  },
+  "username": "john_doe",
+  "fullname": "John Doe",
+  "birthdate": {
+    "$date": "1990-01-01T00:00:00.000Z"
+  },
+  "address": "123 Main Street",
+  "email": "john.doe@example.com",
+  "password": "$2b$10$h66T5TYmoOciuImy6Xo7YeHhfd3ps.p4p5hzqmn6JZM2.NUw6jehi",
+  "role": "admin",
+  "register_date": {
+    "$date": "2025-01-19T12:29:56.572Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b17a1a8b2905717692b889"
+  },
+  "username": "admin",
+  "email": "lep61748@gmail.com",
+  "password": "$2b$10$GseuiVsBfz3JsC6WsVFGGOfC4cEhDAJg/c6IdP/4zQ6Hw0G/4C.oO",
+  "role": "admin",
+  "register_date": {
+    "$date": "2025-02-16T05:39:38.386Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b48ce3c33f3bd3b098b398"
+  },
+  "username": "Test User",
+  "email": "user@gmail.com",
+  "password": "$2b$10$xppabDUZr8F/VFA3ePK8HOEVnTNs/33xShv54jDBDh4WF7HR.xwRa",
+  "role": "client",
+  "register_date": {
+    "$date": "2025-02-18T13:36:35.037Z"
+  },
+  "__v": 0,
+  "address": "fbsdfvsa",
+  "fullname": "Le thi ấcc",
+  "phone": "043523453452",
+  "birthday": {
+    "$date": "2025-02-05T00:00:00.000Z"
+  }
+}]

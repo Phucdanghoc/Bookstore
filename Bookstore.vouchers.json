@@ -1,0 +1,160 @@
+[{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e46c"
+  },
+  "code": "DISCOUNT10",
+  "discount": 10000,
+  "min_order_value": 50000,
+  "expired_date": {
+    "$date": "2025-03-01T00:00:00.000Z"
+  },
+  "status": "Inactive",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.169Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e46d"
+  },
+  "code": "DISCOUNT15",
+  "discount": 15000,
+  "min_order_value": 70000,
+  "expired_date": {
+    "$date": "2025-04-15T00:00:00.000Z"
+  },
+  "status": "Inactive",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.170Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e46e"
+  },
+  "code": "SALE20",
+  "discount": 20000,
+  "min_order_value": 100000,
+  "expired_date": {
+    "$date": "2025-05-10T00:00:00.000Z"
+  },
+  "status": "Inactive",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.171Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e46f"
+  },
+  "code": "SAVE25",
+  "discount": 25000,
+  "min_order_value": 120000,
+  "expired_date": {
+    "$date": "2025-06-01T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.172Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e470"
+  },
+  "code": "LUCKY30",
+  "discount": 30000,
+  "min_order_value": 150000,
+  "expired_date": {
+    "$date": "2025-07-20T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.173Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e471"
+  },
+  "code": "BIGSALE35",
+  "discount": 35000,
+  "min_order_value": 180000,
+  "expired_date": {
+    "$date": "2025-08-05T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.174Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e472"
+  },
+  "code": "HAPPY40",
+  "discount": 40000,
+  "min_order_value": 200000,
+  "expired_date": {
+    "$date": "2025-09-15T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.175Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e473"
+  },
+  "code": "FESTIVE45",
+  "discount": 45000,
+  "min_order_value": 250000,
+  "expired_date": {
+    "$date": "2025-10-30T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.175Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e474"
+  },
+  "code": "YEAR50",
+  "discount": 50000,
+  "min_order_value": 300000,
+  "expired_date": {
+    "$date": "2025-12-31T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.176Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b36b546a8c68b8fd71e475"
+  },
+  "code": "EXCLUSIVE60",
+  "discount": 60000,
+  "min_order_value": 350000,
+  "expired_date": {
+    "$date": "2026-01-20T00:00:00.000Z"
+  },
+  "status": "Active",
+  "created_at": {
+    "$date": "2025-02-17T17:01:08.180Z"
+  },
+  "__v": 0
+}]
