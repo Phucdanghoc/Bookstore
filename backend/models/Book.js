@@ -7,9 +7,12 @@ const BookSchema = new mongoose.Schema({
   category: { type: String, required: true },
   stock: { type: Number, default: 0 },
   pages: { type: Number, required: true },
+  description: { type: String },
+  discount: { type: Number, default: 0 },
   images: { type: [String], required: true }, 
   publisher: { type: String, required: true }, 
   publication_date: { type: Date, required: true },
+  
 });
 
 module.exports = mongoose.model('Book', BookSchema);

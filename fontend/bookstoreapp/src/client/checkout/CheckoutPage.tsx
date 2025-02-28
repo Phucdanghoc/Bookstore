@@ -86,7 +86,11 @@ const CheckoutPage = () => {
                 noteOrder: "",
             });
             if (response.status == 201) {
-                location.href = response.data.VNPUrl;
+                if (response.data.VNPUrl) {
+                    location.href = response.data.VNPUrl;
+                }else {
+                    navigate("/client/payment-result?order_id=" + response.data.order._id);
+                }
             }
         } catch (error) {
             console.error("Lỗi khi đặt hàng:", error);

@@ -14,7 +14,7 @@ const OrderSchema = new mongoose.Schema({
     customerName: { type: String, required: true },
     payment_status: { 
         type: String, 
-        enum: ['unpaid', 'paid', 'refunded', 'failed'], 
+        enum: ['unpaid', 'paid', 'refunded', 'failed', 'cod'], 
         default: 'unpaid' 
     },
     payment_method: { type: String , required: true , enum: ['cod', 'banking', 'vnpay'] },

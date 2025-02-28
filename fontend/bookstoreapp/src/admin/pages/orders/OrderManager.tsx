@@ -26,22 +26,75 @@ const OrderManager = () => {
             console.error("Lỗi khi lấy danh sách đơn hàng:", error);
         }
     };
+    const changeStatus = async (orderId: string, newStatus: string) => {
+        try {
+            const response = await OrderServices.updateStatus(orderId, newStatus);
+            if (response.status == 200) {
+                toast.success(response.data.message);
+                fetchOrders()
+
+            } else {
+                toast.error(response.data.message)
+
+            }
+        }
+        catch (error) {
+            console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+        }
+    }
+    const cancelledOrder = async (orderId: string) => {
+        try {
+            const response = await OrderServices.canceleOrder(orderId);
+            if (response.status == 200) {
+                toast.success(`Đã hủy đơn hàng ${orderId} thành công`);
+                fetchOrders()
+
+            } else {
+                toast.error(`Hủy đơn hàng ${orderId} thất bại`)
+            }
+        }
+        catch (error) {
+            console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+        }
+    }
+
     const formatStatus = (status: string) => {
+        let text = "";
+        let colorClass = "";
+
         switch (status) {
             case "pending":
-                return "Chờ xác nhận";
+                text = "Chờ xác nhận";
+                colorClass = "bg-yellow-100 text-yellow-700";
+                break;
             case "processing":
-                return "Đang xử lý";
+                text = "Đang xử lý";
+                colorClass = "bg-blue-100 text-blue-700";
+                break;
             case "shipping":
-                return "Đang giao";
+                text = "Đang giao";
+                colorClass = "bg-purple-100 text-purple-700";
+                break;
             case "delivered":
-                return "Hoàn thành";
+                text = "Hoàn thành";
+                colorClass = "bg-green-100 text-green-700";
+                break;
             case "cancelled":
-                return "Đã hủy";
+                text = "Đã hủy";
+                colorClass = "bg-red-100 text-red-700";
+                break;
             default:
-                return "";
+                text = "Không xác định";
+                colorClass = "bg-gray-100 text-gray-700";
         }
+
+        return (
+            <span className={`px-2 py-1 rounded-full text-sm font-semibold ${colorClass}`}>
+                {text}
+            </span>
+        );
     };
+
 
 
     return (
@@ -85,27 +138,45 @@ const OrderManager = () => {
                     </thead>
                     <tbody>
                         {orders.map((order) => (
-                            <tr key={order._id} className="bg-white border-b">
-                                <td className="px-6 py-4 font-semibold">#{order._id}</td>
+                            <tr key={order._id} className="bg-white border-b" >
+                                <td className="px-6 py-4 font-semibold"
+                                >
+                                    <button onClick={() => window.open(`/admin/orders/${order._id}`, "_blank")}
+                                    >
+                                        #{order._id}
+                                    </button>
+                                </td>
                                 <td className="px-6 py-4">{order.customerName}</td>
                                 <td className="px-6 py-4 text-blue-600 font-semibold">
-                                    {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(order.total)}
+                                    {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(order.total - order.discount)}
                                 </td>
                                 <td className={`px-6 py-4 font-bold ${order.status === "Completed" ? "text-green-600" : "text-red-600"}`}>
                                     {formatStatus(order.status)}
                                 </td>
                                 <td className="px-6 py-4 flex gap-2">
-                                    <button className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center gap-1">
-                                        <Eye size={16} /> Xem
-                                    </button>
-                                    {order.status != "pending" && (
-                                        <button className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 flex items-center gap-1">
+                                    {order.status == 'delivered' && (
+                                        <button className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center gap-1">
+                                            <Eye size={16} />
+                                            Xem đơn hàng
+                                        </button>
+                                    )}
+                                    {order.status == "shipping" && (
+                                        <button onClick={
+                                            () => {
+                                                changeStatus(order._id, "delivered")
+                                            }
+                                        } className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center gap-1">
                                             <Edit size={16} /> Thanh toán
                                         </button>
                                     )}
+                                    
                                     {order.status == "pending" && (
-                                        <button className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 flex items-center gap-1">
-                                            <Edit size={16} /> Hủy
+                                        <button onClick={
+                                            () => {
+                                                cancelledOrder(order._id)
+                                            }
+                                        } className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 flex items-center gap-1">
+                                            <Edit size={16} /> Hủy đơn
                                         </button>
                                     )}
                                 </td>

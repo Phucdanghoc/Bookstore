@@ -16,7 +16,11 @@ import OrderDetailPage from "./client/order/DetailOrderPage";
 import PaymentPage from "./client/checkout/PaymentPage";
 import ProfilePage from "./client/profile/ProfilePage";
 import VoucherManager from "./admin/pages/voucher/VoucherManager";
-import OrderManager from "./admin/components/orders/OrderManager";
+import OrderManager from "./admin/pages/orders/OrderManager";
+import AdminOrderDetailPage from "./admin/pages/orders/AdminOrderDetailPage";
+import UserManager from "./admin/pages/users/UserManagerPage";
+import UserDetailPage from "./admin/pages/users/UserDetailPage";
+import StatisticsPage from "./admin/pages/statitics/StatiticsPage";
 
 const CheckRoleRedirect = () => {
     const [role, setRole] = useState<string | null>(null);
@@ -60,34 +64,36 @@ const router = createBrowserRouter([
                     { path: "books", element: <BookManager /> },
                     { path: "vouchers", element: <VoucherManager /> },
                     { path: "orders", element: <OrderManager /> },
-                    { path: "customers", element: <h1>Quản lý khách hàng</h1> },
-
+                    { path: "orders/:orderId", element: <AdminOrderDetailPage /> },
+                    { path: "users", element: <UserManager /> },
+                    { path: "users/:id", element: <UserDetailPage /> },
+                    { path: "statistics", element: <StatisticsPage /> },
                 ],
             },
         ],
     },
     {
         path: "/client",
-        element: <ProtectedRoute allowedRoles={["client"]} />,
+        element: <ClientLayout />,
         children: [
+            { index: true, element: <Navigate to="home" replace /> },
+            { path: "home", element: <HomePage /> },
+            { path: "books", element: <BooksPage /> },
+            { path: "books/:id", element: <BookDetailPage /> },
             {
-                path: "",
-                element: <ClientLayout />,
+                element: <ProtectedRoute allowedRoles={["client"]} />,
                 children: [
-                    { index: true, element: <Navigate to="home" replace /> },
-                    { path: "home", element: <HomePage /> },
-                    { path: "books", element: <BooksPage /> },
                     { path: "cart", element: <CartPage /> },
                     { path: "orders/:orderId", element: <OrderDetailPage /> },
                     { path: "payment-result", element: <PaymentPage /> },
                     { path: "checkouts", element: <CheckoutPage /> },
                     { path: "profile", element: <ProfilePage /> },
-                    { path: "books/:id",element: <BookDetailPage /> },
                 ],
             },
         ],
     },
 ]);
+
 
 export default function Routes() {
     return <RouterProvider router={router} />;

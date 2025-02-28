@@ -83,7 +83,7 @@ const getUsers = async (req, res) => {
             return;
         }
         const { page = 1, limit = 10, search = '' } = req.query;
-        const users = await User.find({ username: { $regex: search, $options: 'i' } }).skip((page - 1) * limit).limit(Number(limit));
+        const users = await User.find({ username: { $regex: search, $options: 'i' }, role: { $ne: 'admin' } }).skip((page - 1) * limit).limit(Number(limit));
         const totalUsers = await User.countDocuments();
         const totalPages = Math.ceil(totalUsers / limit);
         res.status(200).json({

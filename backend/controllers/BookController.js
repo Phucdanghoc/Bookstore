@@ -60,7 +60,7 @@ const addBook = async (req, res) => {
     }
 
     try {
-        const { title, author, price, category, stock, pages, publisher, publication_date } = req.body;
+        const { title, author, price, category, stock, pages, publisher, publication_date , description , discount} = req.body;
         let imageUrls = [];
         console.log(req.body);
 
@@ -75,9 +75,11 @@ const addBook = async (req, res) => {
             category,
             stock,
             pages,
+            description,
+            discount,
             publisher,
             publication_date,
-            images: imageUrls,  // Lưu danh sách ảnh
+            images: imageUrls,  
         });
 
         const savedBook = await newBook.save();
@@ -148,6 +150,8 @@ const updateBook = async (req, res) => {
             });
         });
         req.body.images = imageUrls;
+        console.log(req.body);
+        
         const updatedBook = await Book.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
 
         res.status(200).json(updatedBook);
@@ -263,10 +267,10 @@ const getBooksMinStock = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
 
-        const books = await Book.find({ stock: { $lt: 10 } })
+        const books = await Book.find({ stock: { $lt: 10 , $gt: 0 } })
             .skip((page - 1) * limit)
             .limit(Number(limit));
-        const totalBooks = await Book.countDocuments({ stock: { $lt: 10 } });
+        const totalBooks = await Book.countDocuments({ stock: { $lt: 10 , $gt: 0 } });
         const totalPages = Math.ceil(totalBooks / limit);
         res.status(200).json({
             books,

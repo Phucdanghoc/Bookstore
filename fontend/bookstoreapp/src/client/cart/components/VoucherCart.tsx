@@ -2,6 +2,7 @@ import { Ticket } from "lucide-react"; // Icon Voucher từ lucide-react
 import { useEffect, useState } from "react";
 import VoucherData from "../../../interfaces/VoucherData";
 import VoucherServices from "../../../services/VoucherServices";
+import { toast } from "react-toastify";
 
 interface VoucherInCartProps {
     totalPrice: number;
@@ -34,7 +35,7 @@ export default function VoucherInCart({ totalPrice, onVoucherApplied }: VoucherI
             setAppliedVoucher(voucher);
             onVoucherApplied(voucher);
         } else {
-            alert(`Voucher này chỉ áp dụng cho đơn hàng từ ${voucher.min_order_value} VND`);
+            toast.error("Đơn của bạn chưa đủ để áp dụng Voucher này");
         }
     };
 
@@ -98,7 +99,6 @@ export default function VoucherInCart({ totalPrice, onVoucherApplied }: VoucherI
                         <button
                             onClick={() => applyVoucher(voucher)}
                             className={`text-white px-4 py-2 rounded-lg ${voucherApplied && appliedVoucher?._id === voucher._id ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'}`}
-                            disabled={totalPrice < voucher.min_order_value || voucherApplied}
                         >
                             {voucherApplied && appliedVoucher?._id === voucher._id ? "Đã áp dụng" : "Áp dụng"}
                         </button>

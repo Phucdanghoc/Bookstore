@@ -7,6 +7,8 @@ const { getOrders,
     cancelOrder,
     checkPayment,
     getOrdersAdmin,
+    getOrdersByUser,
+    getOrdersCurrentDay,
     vnPayReturn } = require('../controllers/OrderController');
 
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -23,12 +25,14 @@ router.get('/test', async (req, res) => {
 
 router.get('/', authenticateToken, getOrders);
 router.post('/saveOrder', authenticateToken, addOrder);
+router.get('/currentday', authenticateToken, getOrdersCurrentDay);
 router.get('/allorders', authenticateToken, getOrdersAdmin);
 router.get('/checkpayment', authenticateToken, checkPayment);
-router.put('/change-status/:id', authenticateToken, changeStatus);
+router.put('/change-status', authenticateToken, changeStatus);
 router.put('/repayment/:id', authenticateToken, repayVNPAY);
+router.get('/detail-user/:userId', authenticateToken, getOrdersByUser);
 router.get('/vnpay-return', vnPayReturn);
-router.post('/cancel', authenticateToken, cancelOrder);
+router.put('/cancel-order', authenticateToken, cancelOrder);
 router.get('/:id', authenticateToken, getOrderById);
 
 

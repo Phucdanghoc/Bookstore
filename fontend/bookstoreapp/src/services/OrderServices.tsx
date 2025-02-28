@@ -7,20 +7,22 @@ const OrderServices = {
     async createOrder(order: CreateOrderData) {
         return await axios.post(`${API_URL}/orders/saveOrder`, order);
     },
-    // async getOrders() {
-    //     return await axios.get(`${API_URL}/order`);
-    // },
-    // async updateOrder(order: Order) {
-    //     return await axios.put(`${API_URL}/order`, order);
-    // },
-    // async deleteOrder(orderId: number) {
-    //     return await axios.delete(`${API_URL}/order/${orderId}`);
-    // }
     async getAllOrders(status: string, page: number = 1, limit: number = 10) {
         return await axios.get(`${API_URL}/orders/allorders`, {
             params: { status: status, page, limit },
         });
     },
+
+    async updateStatus(orderId: string, status: string) {
+        return await axios.put(`${API_URL}/orders/change-status`, { orderId, status });
+    },
+    async deleteOrder(orderId: string) {
+        return await axios.delete(`${API_URL}/orders/${orderId}`);
+    },
+    async canceleOrder(orderId: string) {
+        return await axios.put(`${API_URL}/orders/cancel-order`, { orderId });
+    },
+
     async getOrders() {
         return await axios.get(`${API_URL}/orders`);
     },
@@ -29,6 +31,12 @@ const OrderServices = {
     },
     async checkPayment(orderId: string) {
         return await axios.get(`${API_URL}/orders/checkpayment?orderId=${orderId}`);
+    },
+    orderCurrentDay: async (limit: number, page: number) => {
+        const response = await axios.get(`${API_URL}/orders/currentday`, {
+            params: { limit, page },
+        });
+        return response.data;
     }
 };
 

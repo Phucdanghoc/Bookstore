@@ -1,7 +1,8 @@
 import { BookData } from "../../interfaces/BookData";
-import { ShoppingCart } from "lucide-react"; // Import icon giỏ hàng
+import { LucideShoppingBag, ShoppingCart, ShoppingCartIcon } from "lucide-react"; // Import icon giỏ hàng
 import CartServices from "../../services/CartServices";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 interface BookCardProps {
     book: BookData;
     addToCart: (isSuccess: boolean) => void;
@@ -14,18 +15,24 @@ export default function BookCard({ book, addToCart }: BookCardProps) {
         console.log("Xem chi tiết sách:", book.title);
         navigate(`/client/books/${book._id}`);
     };
+    const checkIsAuth = () => localStorage.getItem("token") ? true : false;
 
     const handleAddToCart = async () => {
-        try {
-            const response = await CartServices.addToCart(book._id, 1, book.price);
-            if (response.status == 400) {
+        if (!checkIsAuth()) {
+            navigate("/auth");
+            toast.success("Hãy đăng nhập để mua sách nhé");
+        } else {
+            try {
+                const response = await CartServices.addToCart(book._id, 1, book.price);
+                if (response.status == 400) {
+                    addToCart(false);
+                } else {
+                    addToCart(true);
+                }
+            } catch (error) {
                 addToCart(false);
-            }else{
-                addToCart(true);
+                console.error("Lỗi khi thêm vào giỏ hàng:", error);
             }
-        } catch (error) {
-            addToCart(false);
-            console.error("Lỗi khi thêm vào giỏ hàng:", error);
         }
     };
 
@@ -44,7 +51,12 @@ export default function BookCard({ book, addToCart }: BookCardProps) {
                 <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{book.title}</h3>
                 <p className="text-sm text-gray-500">Tác giả: {book.author}</p>
                 <p className="text-blue-500 font-bold mt-2">
-                    {book.price.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+                    {book.discount > 0 &&
+                       ( <>
+                            <span className="line-through text-gray-500 mr-1">{book.price.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</span>
+                            <span className="text-red-500">{(book.price - book.discount).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</span>
+                        </>) || book.price.toLocaleString("vi-VN", { style: "currency", currency: "VND" })
+                    }
                 </p>
             </div>
 
@@ -56,18 +68,22 @@ export default function BookCard({ book, addToCart }: BookCardProps) {
                     Xem chi tiết
                 </button>
 
-                {/* Nút Thêm Vào Giỏ Hàng */}
                 <button
                     onClick={handleAddToCart}
                     disabled={book.stock <= 0}
-                    className={`p-2 rounded-lg transition ${book.stock > 0
+                    className={`p-2 rounded-lg transition flex items-center justify-center gap-2 ${book.stock > 0
                             ? "bg-green-500 text-white hover:bg-green-600"
                             : "bg-gray-400 text-gray-200 cursor-not-allowed"
                         }`}
                 >
-                    {book.stock > 0 && <ShoppingCart size={20} />}
+                    {book.stock > 0 ? (
+                        <>
+                            <ShoppingCartIcon size={20} />
+                        </>
+                    ) : (
+                        <span>Hết hàng</span>
+                    )}
                 </button>
-
             </div>
         </div>
     );

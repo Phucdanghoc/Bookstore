@@ -104,7 +104,7 @@ export default function CartPage() {
 
   const selectedItems = cart.filter(item => item.selected);
   const totalQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = selectedItems.reduce((sum, item) => sum + item.book.price * item.quantity, 0);
+  const totalPrice = selectedItems.reduce((sum, item) => sum + (item.book.price - item.book.discount) * item.quantity, 0);
 
   return (
     <div className="container mx-auto p-2">
@@ -154,7 +154,14 @@ export default function CartPage() {
                     <div className="text-lg text-gray-500">Tác giả: {item.book.author}</div>
                     <div className="text-lg text-gray-500">Nhà xuất bản: {item.book.publisher}</div>
                     <div className="text-blue-500 font-bold text-lg">
-                      {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(item.book.price)}
+                      {item.book.discount > 0 && (
+                        <div>
+                          <span className="line-through text-gray-500">{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(item.book.price)}</span>
+                          <span className="ml-2">{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(item.book.price - item.book.discount)}</span>
+                        </div>
+                      ) || (
+                        <span>{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(item.book.price)}</span>
+                      )}
                     </div>
                   </div>
 

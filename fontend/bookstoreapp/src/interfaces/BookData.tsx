@@ -5,8 +5,10 @@ interface BookData {
   price: number;
   category: string;
   stock: number;
+  description: string;
   pages: number;
   images: string[];
+  discount : number;
   publisher: string;
   publication_date: string;
 }

@@ -181,7 +181,7 @@ const ProfilePage = () => {
                     {activeTab === "pending" && renderOrderList(orders.filter(order => order.payment_status === "unpaid"), navigate)}
                     {activeTab === "paid" && renderOrderList(orders.filter(order => order.payment_status === "paid"), navigate)}
                     {activeTab === "shipping" && renderOrderList(orders.filter(order => order.status === "shipping"), navigate)}
-                    {activeTab === "shipped" && renderOrderList(orders.filter(order => order.status === "shipped"), navigate)}
+                    {activeTab === "shipped" && renderOrderList(orders.filter(order => order.status === "delivered"), navigate)}
                 </div>
             </div>
         </div>

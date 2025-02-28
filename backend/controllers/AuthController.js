@@ -19,7 +19,7 @@ const register = async (req, res) => {
         const newUser = new User({
             username,
             email,
-            role: 'user',
+            role: 'client',
             password: hashedPassword,
         });
 

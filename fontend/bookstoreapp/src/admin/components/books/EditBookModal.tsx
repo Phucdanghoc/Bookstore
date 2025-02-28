@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Plus, Trash2, Loader2 } from "lucide-react";
-import {BookData} from "../../../interfaces/BookData";
+import { BookData } from "../../../interfaces/BookData";
 import BookServices from "../../../services/BookServices";
 
 interface EditBookModalProps {
@@ -21,6 +21,8 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
         author: "",
         price: 0,
         category: "",
+        description: "",
+        discount: 0,
         stock: 0,
         pages: 0,
         images: [],
@@ -36,6 +38,8 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        console.log(name, value);
+
         setBook((prev) => ({
             ...prev,
             [name]: name === "price" || name === "stock" || name === "pages" ? Number(value) : value,
@@ -119,7 +123,7 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                         <label className="block text-sm font-medium">Tiêu đề</label>
                         <input type="text" name="title" className="w-full p-3 border rounded-lg" value={book.title} onChange={handleChange} required />
                     </div>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-3 gap-6">    
                         <div>
                             <label className="block text-sm font-medium">Tác giả</label>
                             <input type="text" name="author" className="w-full p-3 border rounded-lg" value={book.author} onChange={handleChange} required />
@@ -127,6 +131,10 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                         <div>
                             <label className="block text-sm font-medium">Giá</label>
                             <input type="number" name="price" className="w-full p-3 border rounded-lg" value={book.price} onChange={handleChange} required />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Giảm giá </label>
+                            <input type="number" name="discount" className="w-full p-3 border rounded-lg" value={book.discount} onChange={handleChange} required />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
@@ -168,6 +176,16 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                             />
                         </div>
                     </div>
+                    <div className="grid grid-cols-1 gap-2">
+                        <label className="block text-sm font-medium">Mô tả</label>
+                        <textarea
+                            name="description"
+                            className="w-full p-3 border rounded-lg"
+                            value={book.description}
+                            onChange={handleChange}
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium">Hình ảnh</label>
                         <div className="grid grid-cols-6 gap-2">

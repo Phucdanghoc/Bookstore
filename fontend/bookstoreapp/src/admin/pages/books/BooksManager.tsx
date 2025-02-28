@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import AddBookModal from "../../components/books/AddBookModal";
-import {BookData} from "../../../interfaces/BookData";
+import { BookData } from "../../../interfaces/BookData";
 import EditBookModal from "../../components/books/EditBookModal";
 
 import ModalAccept from "../../../components/ModalAccept";
@@ -114,7 +114,8 @@ export default function BookManager() {
               <th scope="col" className="px-6 py-3">Tiêu đề</th>
               <th scope="col" className="px-6 py-3">Tác giả</th>
               <th scope="col" className="px-6 py-3">Thể loại</th>
-              <th scope="col" className="px-6 py-3">Giá</th>
+              <th scope="col" className="px-6 py-3">Giá gốc</th>
+              <th scope="col" className="px-6 py-3">Giá giảm</th>
               <th scope="col" className="px-6 py-3">Kho</th>
               <th scope="col" className="px-6 py-3">Hành động</th>
             </tr>
@@ -134,8 +135,17 @@ export default function BookManager() {
                 </th>
                 <td className="px-6 py-4">{book.author}</td>
                 <td className="px-6 py-4">{book.category}</td>
-                <td className="px-6 py-3">
+                <td className="px-6 py-3 font-bold">
                   {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(book.price)}
+                </td>
+                <td className="px-6 py-3">
+                  {book.discount > 0 ? (
+                    <>
+                      <p className="text-red-500 ">
+                        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(book.discount)}
+                      </p>
+                    </>
+                  ) : null}
                 </td>
                 <td className="px-6 py-3">{book.stock > 0 ? book.stock : <p className="text-red-600">Hết hàng</p>}</td>
                 <td className="px-6 py-4">

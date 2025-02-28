@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ShoppingCart, CreditCard, MapPin, User, Phone, FileText, Notebook } from "lucide-react";
-import OrderServices from "../../services/OrderServices";
-import { OrderData } from "../../interfaces/OrderData";
+import { OrderData } from "../../../interfaces/OrderData";
+import OrderServices from "../../../services/OrderServices";
 
 const OrderDetailPage = () => {
     const { orderId } = useParams<string>();
@@ -52,6 +52,8 @@ const OrderDetailPage = () => {
             </span>
         );
     };
+    
+
     return (
         <div className="max-w-6xl  mx-auto p-8 bg-white rounded-xl shadow-lg mt-4 border border-blue-300">
             {/* Tiêu đề */}
@@ -120,7 +122,6 @@ const OrderDetailPage = () => {
                 <div className="max-h-96 overflow-y-auto space-y-4">
                     {order.order_items.map((item, index) => (
                         <div 
-                            onClick={() => window.open(`/client/books/${item.book._id}`, "_blank")}
                         key={index} className="flex items-center m-2 p-4 bg-white shadow-md rounded-lg border border-blue-300 hover:border-blue-400 hover:shadow-lg hover:scale-101 transition duration-300 ease-in-out">
                             <img src={`${URL_API}${item.book.images[0]}`} alt={item.book.title} className="w-30 h-40 object-cover rounded-md border" />
                             <div className="ml-4 flex-1">

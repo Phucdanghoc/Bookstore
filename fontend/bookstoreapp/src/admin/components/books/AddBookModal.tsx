@@ -12,8 +12,8 @@ interface AddBookModalProps {
 
 const categorySuggestions = ["Fiction", "Non-fiction", "Science"];
 
-export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
-  const [isLoading, setIsLoading] = useState(false); // ✅ Thêm state loading
+export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [book, setBook] = useState<BookData>({
     _id: "",
     title: "",
@@ -21,10 +21,12 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
     price: 0,
     category: "",
     stock: 0,
-    pages: 0,
+    description: "",
+    pages: 0, 
     images: [],
     publisher: "",
     publication_date: "",
+    discount : 0
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -32,7 +34,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
     setBook((prev) => ({
       ...prev,
       [name]: name === "price" || name === "stock" || name === "pages" ? Number(value) : value,
-    }));
+    }));      
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,8 +58,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // ✅ Bắt đầu loading
-
+    setIsLoading(true);
     try {
       const bookData = {
         title: book.title,
@@ -65,9 +66,11 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
         price: book.price,
         category: book.category,
         stock: book.stock,
+        description: book.description,
         pages: book.pages,
         publisher: book.publisher,
-        publication_date: book.publication_date,
+        publication_date: book.publication_date,  
+        discount: 0
       };
 
       const newBook = await BookServices.createBook(bookData);
@@ -107,10 +110,12 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
         author: "",
         price: 0,
         category: "",
+        description: "",
         stock: 0,
         pages: 0,
         images: [],
         publisher: "",
+        discount : 0,
         publication_date: "",
       });
     }
@@ -134,7 +139,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
             <input type="text" name="title" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium">Tác giả</label>
               <input type="text" name="author" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
@@ -142,6 +147,10 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
             <div>
               <label className="block text-sm font-medium">Giá</label>
               <input type="number" name="price" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Giảm giá </label>
+              <input type="number" name="discount" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-6">
@@ -185,6 +194,15 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
                 placeholder="YYYY-MM-DD"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            <label className="block text-sm font-medium">Mô tả</label>
+            <textarea
+              name="description"
+              className="w-full p-3 border rounded-lg"
+              onChange={handleChange}
+            />
           </div>
 
           <div>

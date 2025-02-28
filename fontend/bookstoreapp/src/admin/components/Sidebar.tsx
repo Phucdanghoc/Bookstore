@@ -17,6 +17,7 @@ export default function Sidebar() {
                             <li><Link to="/admin/vouchers" className="block py-2 hover:bg-gray-700">🎟️ Quản lý voucher</Link></li>
                             <li><Link to="/admin/orders" className="block py-2 hover:bg-gray-700">📦 Đơn hàng</Link></li>
                             <li><Link to="/admin/users" className="block py-2 hover:bg-gray-700">👤 Người dùng</Link></li>
+                            <li><Link to="/admin/statistics" className="block py-2 hover:bg-gray-700">📊 Thống kê</Link></li>
                         </ul>
                     </nav>
                 </div>

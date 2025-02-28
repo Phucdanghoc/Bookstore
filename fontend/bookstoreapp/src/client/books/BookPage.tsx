@@ -89,7 +89,7 @@ export default function BooksPage() {
     const alertAddtoCart = (result = true) => {
         if (result) {
             toast.success("Thêm vào giỏ hàng thành công");
-        }else{
+        } else {
             toast.error("Đã hết hàng");
         }
     };
@@ -98,8 +98,25 @@ export default function BooksPage() {
         <div className="container mx-auto p-2">
 
             <div className="flex gap-4">
-                <div className="w-2/12 p-4 bg-gray-100 rounded-lg flex flex-col justify-center h-full mt-[100px]">
+                <div className="w-2/12 p-4 bg-gray-100 rounded-lg flex flex-col h-full mt-[100px]">
                     <h3 className="text-lg font-semibold mb-4">Lọc theo</h3>
+
+                    {/* Danh mục sách */}
+                    <div className="mb-4">
+                        <h4 className="font-semibold mb-2">Danh mục</h4>
+                        <ul className="space-y-2">
+                            {categories.map(category => (
+                                <li key={category._id}>
+                                    <button
+                                        className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-300 ${selectedCategory === category._id ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-blue-50"}`}
+                                        onClick={() => setSelectedCategory(category._id)}
+                                    >
+                                        {category._id} ({category.count})
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
                     {/* Khoảng giá */}
                     <div className="mb-4 flex-grow">
@@ -133,6 +150,7 @@ export default function BooksPage() {
                         <p className="text-sm text-gray-600">Giá tối đa: {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(priceRange.max)}</p>
                     </div>
 
+                    {/* Lọc theo ngày xuất bản */}
                     <div className="mb-4">
                         <h4 className="font-semibold">Lọc theo ngày xuất bản</h4>
                         <div className="flex items-center gap-2">
@@ -189,17 +207,7 @@ export default function BooksPage() {
                         </div>
                     </div>
 
-                    <div className="flex gap-2 overflow-x-auto pb-2 mb-4 justify-center mx-auto">
-                        {categories.map(category => (
-                            <button
-                                key={category._id}
-                                className={`px-4 py-2 rounded-full border transition-all ease-in-out duration-300 ${selectedCategory === category._id ? "bg-blue-500 text-white" : "bg-gray-100 hover:bg-blue-50"}`}
-                                onClick={() => setSelectedCategory(category._id)}
-                            >
-                                {category._id}
-                            </button>
-                        ))}
-                    </div>
+                   
 
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 overflow-y-auto p-4">

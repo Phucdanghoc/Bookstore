@@ -123,6 +123,7 @@ const checkoutToken = async (req, res) => {
     try {
         const userId = req.user.id;
         const { cartItems, voucherCode } = req.body;
+        console.log(userId, cartItems, voucherCode);
 
         if (!cartItems || cartItems.length === 0) {
             return res.status(400).json({ message: "Danh sách sản phẩm không hợp lệ." });
@@ -144,15 +145,17 @@ const getCheckout = async (req, res) => {
         const { token } = req.query;
 
         const payload = TokenService.verifyToken(token);
-
+        
         if (!payload || payload.userId !== userId) {
             return res.status(400).json({ message: "Token không hợp lệ." });
         }
         const { cartItems, voucherCode } = payload;
+        console.log(cartItems, voucherCode);
+        
         let voucher = null;
         if (voucherCode) {
             voucher = await Voucher
-                .find({ _id: voucherCode, status: "active", expired_date: { $gte: new Date() } })
+                .find({ _id: voucherCode, status: "Active", expired_date: { $gte: new Date() } })
                 .exec();
             if (!voucher) {
                 return res.status(404).json({ message: "Voucher không hợp lệ." });
@@ -169,6 +172,8 @@ const getCheckout = async (req, res) => {
             .select("fullname email phone address")
             .exec();
         const total = selectedItems.reduce((acc, item) => acc + item.quantity * item.book.price, 0);
+        console.log(voucher);
+        
         res.status(200).json({ items: selectedItems, totalPrice: total, voucher: voucher, user: user });
     }
     catch (error) {

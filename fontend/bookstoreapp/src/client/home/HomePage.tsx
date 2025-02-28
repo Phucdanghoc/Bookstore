@@ -12,6 +12,7 @@ export default function HomePage() {
     const [books, setBooks] = useState<BookData[]>([]);
     const [vouchers, setVouchers] = useState<VoucherData[]>([]);
     const [currentBookIndex, setCurrentBookIndex] = useState(0);
+    const URL_API = "http://localhost:3000";
     const [fade, setFade] = useState(true);
     const navigate = useNavigate();
     useDocumentTitle("Trang chủ");
@@ -77,7 +78,15 @@ export default function HomePage() {
                         <div className="text-white space-y-2">
                             <h2 className="text-4xl font-extrabold uppercase tracking-wide">{currentBook.title}</h2>
                             <p className="text-xl text-gray-100 font-medium">Tác giả: <span className="font-semibold">{currentBook.author}</span></p>
-                            <p className="text-3xl text-yellow-300 font-bold">{currentBook.price.toLocaleString()} VND</p>
+                            {currentBook.discount > 0 && (
+                                <p className="text-2xl text-white-400 font-semibold">
+                                    Giá: <span className="text-yellow">{(currentBook.price - currentBook.discount).toLocaleString()} VND</span>
+                                </p>
+                            ) || (
+                                <p className="text-2xl text-yellow-400 font-semibold">
+                                    Giá: <span className="text-yellow">{currentBook.price.toLocaleString()} VND</span>
+                                </p>
+                            )}
                             <p className="text-2xl text-white-400 font-semibold">
                                 Chỉ còn lại: <span className="text-white">{currentBook.stock} cuốn</span>
                             </p>
@@ -116,13 +125,20 @@ export default function HomePage() {
                     {books.map((book) => (
                         <div key={book._id} className="bg-white shadow-lg rounded-lg p-4 hover:scale-105 transition-transform" onClick={() => navigate(`/client/books/${book._id}`)}>
                             <img
-                                src={book.images[0] || "https://cdn0.fahasa.com/media/catalog/product/1/4/1450-4141-9057.jpg"}
+                                src={`${URL_API}${book.images[0]}` || "https://cdn0.fahasa.com/media/catalog/product/1/4/1450-4141-9057.jpg"}
                                 alt={book.title}
                                 className="w-full h-[250px] object-cover rounded-lg"
                             />
                             <h3 className="mt-4 text-xl font-bold">{book.title}</h3>
                             <p className="text-gray-600">Tác giả: {book.author}</p>
-                            <p className="text-blue-500 font-semibold">{book.price.toLocaleString()} VND</p>
+                            {book.discount > 0 ? (
+                                <>
+                                    <p className="text-red-500 font-semibold line-through">{book.price.toLocaleString()} VND</p>
+                                    <p className="text-blue-500 font-semibold">{(book.price - book.discount).toLocaleString()} VND</p>
+                                </>
+                            ) : (
+                                <p className="text-blue-500 font-semibold">{book.price.toLocaleString()} VND</p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -143,7 +159,6 @@ export default function HomePage() {
                             key={voucher._id}
                             className="relative bg-gradient-to-r from-blue-400 to-blue-500 p-6 rounded-xl shadow-xl flex flex-col items-center w-[280px] hover:scale-105 transition-transform border-2 border-yellow-300"
                         >
-                            {/* Icon quà tặng 🎁 */}
                             <div className="absolute -top-6 bg-yellow-400 text-white px-4 py-2 rounded-full shadow-md text-lg font-bold">
                                 🎁 {voucher.code}
                             </div>
@@ -155,7 +170,6 @@ export default function HomePage() {
                                 HSD: {new Date(voucher.expired_date).toLocaleDateString("vi-VN")}
                             </p>
 
-                            {/* Nút sử dụng */}
                             <button className="mt-4 bg-yellow-400 text-blue-900 font-semibold px-6 py-2 rounded-full shadow-md hover:bg-yellow-500 transition">
                                 <Link to={`/client/cart`}>
                                     Sử dụng Voucher
