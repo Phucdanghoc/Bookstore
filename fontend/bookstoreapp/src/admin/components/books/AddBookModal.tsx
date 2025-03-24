@@ -9,10 +9,21 @@ interface AddBookModalProps {
   onSubmit: (bookData: BookData) => void;
 }
 
+// Danh sách các thể loại mẫu
+const categoryOptions = [
+  "Fiction",
+  "Non-fiction",
+  "Science",
+  "Fantasy",
+  "Mystery",
+  "Biography",
+  "History",
+  "Romance",
+  "Thriller",
+  "Self-help",
+];
 
-const categorySuggestions = ["Fiction", "Non-fiction", "Science"];
-
-export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
+export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [book, setBook] = useState<BookData>({
     _id: "",
@@ -22,37 +33,35 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
     category: "",
     stock: 0,
     description: "",
-    pages: 0, 
+    pages: 0,
     images: [],
     publisher: "",
     publication_date: "",
-    discount : 0
+    discount: 0,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBook((prev) => ({
       ...prev,
       [name]: name === "price" || name === "stock" || name === "pages" ? Number(value) : value,
-    }));      
+    }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const newImages = Array.from(files).slice(0, 5 - book.images.length).map(file => URL.createObjectURL(file));
+      const newImages = Array.from(files)
+        .slice(0, 5 - book.images.length)
+        .map((file) => URL.createObjectURL(file));
       setBook((prev) => ({ ...prev, images: [...prev.images, ...newImages] }));
     }
-  };
-
-  const handleCategoryClick = (category: string) => {
-    setBook((prev) => ({ ...prev, category }));
   };
 
   const removeImage = (index: number) => {
     setBook((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
@@ -69,8 +78,8 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         description: book.description,
         pages: book.pages,
         publisher: book.publisher,
-        publication_date: book.publication_date,  
-        discount: 0
+        publication_date: book.publication_date,
+        discount: book.discount,
       };
 
       const newBook = await BookServices.createBook(bookData);
@@ -85,20 +94,16 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         const response = await BookServices.uploadImages(newBook._id, imageFiles);
         if (response.success) {
           console.log("📸 Images Uploaded");
-          setIsLoading(false);
-
         } else {
           console.error("🚨 Error:", response);
-          setIsLoading(false);
-
         }
-        console.log("📸 Images Uploaded");
       }
+      onSubmit(newBook); // Gọi onSubmit để thông báo cho component cha
       onClose();
     } catch (error) {
-      setIsLoading(false);
       console.error("🚨 Error:", error);
-
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,12 +120,11 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         pages: 0,
         images: [],
         publisher: "",
-        discount : 0,
+        discount: 0,
         publication_date: "",
       });
     }
   }, [isOpen]);
-
 
   if (!isOpen) return null;
 
@@ -136,50 +140,99 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto no-scrollbar">
           <div>
             <label className="block text-sm font-medium">Tiêu đề</label>
-            <input type="text" name="title" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+            <input
+              type="text"
+              name="title"
+              className="w-full p-3 border rounded-lg"
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium">Tác giả</label>
-              <input type="text" name="author" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <input
+                type="text"
+                name="author"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium">Giá</label>
-              <input type="number" name="price" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <input
+                type="number"
+                name="price"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium">Giảm giá </label>
-              <input type="number" name="discount" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <label className="block text-sm font-medium">Giảm giá</label>
+              <input
+                type="number"
+                name="discount"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium">Nhà xuất bản</label>
-              <input type="text" name="publisher" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <input
+                type="text"
+                name="publisher"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium">Thể loại</label>
-              <input type="text" name="category" className="w-full p-3 border rounded-lg" value={book.category} onChange={handleChange} required />
-              <div className="flex gap-2 mt-2">
-                {categorySuggestions.map((cat) => (
-                  <button key={cat} type="button" className="px-4 py-2 border rounded-full bg-gray-100 hover:bg-gray-200" onClick={() => handleCategoryClick(cat)}>
+              <select
+                name="category"
+                className="w-full p-3 border rounded-lg"
+                value={book.category}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>
+                  Chọn thể loại
+                </option>
+                {categoryOptions.map((cat) => (
+                  <option key={cat} value={cat}>
                     {cat}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
           </div>
-
 
           <div className="grid grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium">Số lượng</label>
-              <input type="number" name="stock" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <input
+                type="number"
+                name="stock"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium">Số trang</label>
-              <input type="number" name="pages" className="w-full p-3 border rounded-lg" onChange={handleChange} required />
+              <input
+                type="number"
+                name="pages"
+                className="w-full p-3 border rounded-lg"
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium">Ngày xuất bản</label>
@@ -190,7 +243,6 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 value={book.publication_date}
                 onChange={handleChange}
                 required
-
                 placeholder="YYYY-MM-DD"
               />
             </div>
@@ -211,7 +263,10 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
               {book.images.map((image, index) => (
                 <div key={index} className="relative w-20 h-20 border rounded-lg overflow-hidden">
                   <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                  <button onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                  >
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -230,11 +285,7 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
             className="w-full bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <Loader2 size={24} className="animate-spin" />
-            ) : (
-              "Thêm mới"
-            )}
+            {isLoading ? <Loader2 size={24} className="animate-spin" /> : "Thêm mới"}
           </button>
         </form>
       </div>

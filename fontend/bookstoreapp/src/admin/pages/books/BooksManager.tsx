@@ -74,7 +74,7 @@ export default function BookManager() {
   };
 
   return (
-    <div className="p-6 flex flex-col h-screen">
+    <div className="p-6 flex flex-col h-screen z-0">
       <ModalAccept
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}

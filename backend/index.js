@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended:false}))
 app.use(bodyParser.json())
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/bookstore';
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/Bookstore';
 mongoose
     .connect(mongoURI)
     .then(() => console.log('Connected to MongoDB'))

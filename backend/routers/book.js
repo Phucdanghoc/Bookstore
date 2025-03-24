@@ -1,6 +1,7 @@
 const express = require('express');
 const { getBooks, getBookById, addBook, getBooksMinStock, updateBook, deleteBook, getBooksByCategory, searchBooksByTitle, getTopCategories, searchBooksByRange,
     searchBooksByOldest,
+    filterBooks,
     searchBooksByNewest, } = require('../controllers/BookController');
 const { uploadImageBook } = require('../controllers/MediaController');
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -14,6 +15,7 @@ router.get('/search', searchBooksByTitle);
 router.get('/top-categories', getTopCategories);
 router.get('/range', searchBooksByRange);
 router.get('/oldest', searchBooksByOldest);
+router.get('/filter', filterBooks);
 router.get('/newest', searchBooksByNewest);
 router.get('/min-stock', getBooksMinStock);
 router.get('/:id', getBookById);

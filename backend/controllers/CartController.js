@@ -31,16 +31,15 @@ const getCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const { book } = req.body;
+        const { book, quantity } = req.body;
 
         let cart = await Cart.findOne({ user: req.user.id }).populate("cart_items");
         if (!cart) {
             cart = new Cart({ user: req.user.id, cart_items: [] });
         }
         let cartItem = cart.cart_items.find(item => item.book.toString() === book);
-        console.log(cartItem);
         if (cartItem) {
-            cartItem.quantity += 1;
+            cartItem.quantity += quantity;
             const book = await Book.findById(cartItem.book);
             if (cartItem.quantity >= book.stock) {
                 return res.status(400).json({ message: "Xin lỗi nhé, sách đã hết hàng" });
@@ -48,7 +47,7 @@ const addToCart = async (req, res) => {
                 await cartItem.save();
             }
         } else {
-            cartItem = new CartItem({ book, quantity: 1 });
+            cartItem = new CartItem({ book, quantity: quantity });
             const savedCartItem = await cartItem.save();
             cart.cart_items.push(savedCartItem._id);
         }
@@ -174,7 +173,7 @@ const getCheckout = async (req, res) => {
         const total = selectedItems.reduce((acc, item) => acc + item.quantity * item.book.price, 0);
         console.log(voucher);
         
-        res.status(200).json({ items: selectedItems, totalPrice: total, voucher: voucher, user: user });
+        res.status(200).json({ items: selectedItems, totalPrice: total, voucher: voucher || [], user: user });
     }
     catch (error) {
         console.error("Lỗi khi lấy danh sách checkout:", error);

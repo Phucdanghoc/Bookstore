@@ -40,7 +40,6 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
         );
     }
 
-    console.log("User Role:", userRole);
 
     if (!userRole) {
         return <Navigate to="/auth" state={{ from: location }} replace />;

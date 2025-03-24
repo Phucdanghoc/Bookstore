@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import BookCard from "../components/BookCard";
 import { BookData, CategoriesData } from "../../interfaces/BookData";
 import axios from "axios";
-import { Cat, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import BookService from "../../services/BookServices";
-import Alert from "../../components/Alert";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { toast } from "react-toastify";
 
@@ -21,9 +20,9 @@ export default function BooksPage() {
         _id: "Tất cả",
         count: 0,
     }]);
-    const [alert, setAlert] = useState<{ type: "success" | "danger"; message: string } | null>(null);
-    const [sortBy, setSortBy] = useState("A-Z");
-    const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
+    const [sortBy, setSortBy] = useState(""); // "" là không sắp xếp, "newest" hoặc "oldest"
+    const [priceRange, setPriceRange] = useState(1000000); // Chỉ giữ một giá trị max
+
     useEffect(() => {
         const searchByCategory = async () => {
             try {
@@ -45,14 +44,6 @@ export default function BooksPage() {
         }
         searchByCategory();
     }, [selectedCategory, currentPage]);
-    useEffect(() => {
-        axios.get(`${URL_API}?page=${currentPage}&limit=8`)
-            .then(response => {
-                setBooks(response.data.books);
-                setTotalPages(response.data.totalPages);
-            })
-            .catch(error => console.error(error));
-    }, [currentPage]);
 
     useEffect(() => {
         axios.get(`${URL_API}/top-categories?top=8`)
@@ -61,7 +52,6 @@ export default function BooksPage() {
             })
             .catch(error => console.error("Lỗi lấy categories:", error));
     }, []);
-
 
     const handleSearch = () => {
         const searchByTitle = async () => {
@@ -75,8 +65,6 @@ export default function BooksPage() {
         };
         searchByTitle();
     };
-
-
 
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
@@ -94,60 +82,47 @@ export default function BooksPage() {
         }
     };
 
+    const applyFilters = () => {
+        try {
+            const filterBooks = async () => {
+                const response = await BookService.filterBooks(sortBy === "newest", priceRange, currentPage, 8);
+                setBooks(response.books);
+                setTotalPages(response.totalPages);
+            };
+            filterBooks();
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm sách theo giá:", error);
+        }
+    };
+
     return (
         <div className="container mx-auto p-2">
-
             <div className="flex gap-4">
                 <div className="w-2/12 p-4 bg-gray-100 rounded-lg flex flex-col h-full mt-[100px]">
                     <h3 className="text-lg font-semibold mb-4">Lọc theo</h3>
 
-                    {/* Danh mục sách */}
-                    <div className="mb-4">
-                        <h4 className="font-semibold mb-2">Danh mục</h4>
-                        <ul className="space-y-2">
-                            {categories.map(category => (
-                                <li key={category._id}>
-                                    <button
-                                        className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-300 ${selectedCategory === category._id ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-blue-50"}`}
-                                        onClick={() => setSelectedCategory(category._id)}
-                                    >
-                                        {category._id} ({category.count})
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    {/* Nút áp dụng */}
+                    <button
+                        onClick={applyFilters}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all ease-in-out duration-300 mb-4"
+                    >
+                        Áp dụng
+                    </button>
 
                     {/* Khoảng giá */}
-                    <div className="mb-4 flex-grow">
+                    <div className="mb-4">
                         <h4 className="font-semibold">Khoảng giá</h4>
-                        <input
-                            type="number"
-                            value={priceRange.min}
-                            min="0"
-                            onChange={(e) => setPriceRange(prev => ({ ...prev, min: +e.target.value }))}
-                            className="w-full p-2 mb-2 border rounded"
-                            placeholder="Min giá"
-                        />
-                        <input
-                            type="number"
-                            min="0"
-                            value={priceRange.max}
-                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: +e.target.value }))}
-                            className="w-full p-2 border rounded"
-                            placeholder="Max giá"
-                        />
-
-                        {/* Input Range */}
                         <input
                             type="range"
                             min="0"
                             max="1000000"
-                            value={priceRange.max}
-                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: +e.target.value }))}
+                            value={priceRange}
+                            onChange={(e) => setPriceRange(+e.target.value)}
                             className="w-full mt-2"
                         />
-                        <p className="text-sm text-gray-600">Giá tối đa: {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(priceRange.max)}</p>
+                        <p className="text-sm text-gray-600">
+                            Giá tối đa: {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(priceRange)}
+                        </p>
                     </div>
 
                     {/* Lọc theo ngày xuất bản */}
@@ -163,7 +138,6 @@ export default function BooksPage() {
                             />
                             <label htmlFor="newest">Mới nhất</label>
                         </div>
-
                         <div className="flex items-center gap-2 mt-2">
                             <input
                                 type="checkbox"
@@ -176,16 +150,23 @@ export default function BooksPage() {
                         </div>
                     </div>
 
-                    {/* Nút áp dụng */}
-                    <button
-                        onClick={() => setCurrentPage(1)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all ease-in-out duration-300"
-                    >
-                        Áp dụng
-                    </button>
+                    {/* Danh mục sách */}
+                    <div className="mb-4 flex-grow">
+                        <h4 className="font-semibold mb-2">Danh mục</h4>
+                        <ul className="space-y-2">
+                            {categories.map(category => (
+                                <li key={category._id}>
+                                    <button
+                                        className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-300 ${selectedCategory === category._id ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-blue-50"}`}
+                                        onClick={() => setSelectedCategory(category._id)}
+                                    >
+                                        {category._id} ({category.count})
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-
-
 
                 {/* Book List Column */}
                 <div className="w-10/12 p-2">
@@ -207,9 +188,6 @@ export default function BooksPage() {
                         </div>
                     </div>
 
-                   
-
-
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 overflow-y-auto p-4">
                         {books.map(book => (
                             <BookCard book={book} key={book._id} addToCart={alertAddtoCart} />
@@ -225,9 +203,7 @@ export default function BooksPage() {
                         >
                             <ChevronLeft color={currentPage === 1 ? "gray" : "white"} />
                         </button>
-
                         <span className="text-lg font-semibold text-white">Trang {currentPage} / {totalPages}</span>
-
                         <button
                             onClick={handleNextPage}
                             disabled={currentPage === totalPages}

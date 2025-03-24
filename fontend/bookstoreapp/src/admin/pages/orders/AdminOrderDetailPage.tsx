@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { ShoppingCart, CreditCard, MapPin, User, Phone, FileText, Notebook } from "lucide-react";
+import { ShoppingCart, CreditCard, MapPin, User, Phone, FileText, Notebook, Timer } from "lucide-react";
 import { OrderData } from "../../../interfaces/OrderData";
 import OrderServices from "../../../services/OrderServices";
 
@@ -24,35 +24,7 @@ const OrderDetailPage = () => {
     if (!order) {
         return <div className="text-center p-6 text-blue-600 text-xl font-semibold">Đang tải...</div>;
     }
-    const formatStatusOrder = (status: string) => {
-        let text = "";
-        let colorClass = "";
-    
-        switch (status) {
-            case "unpaid":
-                text = "Chưa thanh toán";
-                colorClass = "bg-yellow-100 text-yellow-700";
-                break;
-            case "paid":
-                text = "Đã thanh toán";
-                colorClass = "bg-blue-100 text-blue-700";
-                break;
-            case "refunded":
-                text = "Đã hoàn tiền";
-                colorClass = "bg-red-100 text-red-700";
-                break;
-            default:
-                text = "Chưa cập nhật";
-                colorClass = "bg-gray-100 text-gray-700";
-        }
-    
-        return (
-            <span className={`px-2 py-1 text-sm font-semibold rounded-full ${colorClass}`}>
-                {text}
-            </span>
-        );
-    };
-    
+
 
     return (
         <div className="max-w-6xl  mx-auto p-8 bg-white rounded-xl shadow-lg mt-4 border border-blue-300">
@@ -72,6 +44,13 @@ const OrderDetailPage = () => {
                 <p className="text-lg text-gray-700 flex items-center gap-3 p-2">
                     <MapPin className="text-blue-600 w-6 h-6" /> <strong>Địa chỉ:</strong> {order.shipping_address}
                 </p>
+                <p className="text-lg text-gray-700 flex items-center gap-3 p-2">
+                    <Timer className="text-blue-600 w-6 h-6" />
+                    <strong>Ngày đặt hàng:</strong> {new Date(order.order_date).toLocaleDateString("vi-VN", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                    })}                </p>
                 {order.noteOrder && (
                     <>
                         <p className="text-lg text-gray-700 flex items-center gap-3 p-2"><Notebook className="text-blue-600 w-6 h-6" /> <strong>Ghi chú:</strong> {order.noteOrder}</p>
@@ -90,7 +69,9 @@ const OrderDetailPage = () => {
                             VNPAY
                         </span>
                     ) : (
-                        formatStatusOrder(order.payment_method  || "Chưa cập nhật")
+                        <span className="flex items-center gap-3 ps-3 text-blue-600 font-semibold">
+                            Thanh toán khi nhận hàng
+                        </span>
                     )}
                 </p>
 
@@ -121,8 +102,8 @@ const OrderDetailPage = () => {
                 {/* Container có scroll nếu danh sách dài */}
                 <div className="max-h-96 overflow-y-auto space-y-4">
                     {order.order_items.map((item, index) => (
-                        <div 
-                        key={index} className="flex items-center m-2 p-4 bg-white shadow-md rounded-lg border border-blue-300 hover:border-blue-400 hover:shadow-lg hover:scale-101 transition duration-300 ease-in-out">
+                        <div
+                            key={index} className="flex items-center m-2 p-4 bg-white shadow-md rounded-lg border border-blue-300 hover:border-blue-400 hover:shadow-lg hover:scale-101 transition duration-300 ease-in-out">
                             <img src={`${URL_API}${item.book.images[0]}`} alt={item.book.title} className="w-30 h-40 object-cover rounded-md border" />
                             <div className="ml-4 flex-1">
                                 <p className="text-2xl font-medium">{item.book.title}</p>

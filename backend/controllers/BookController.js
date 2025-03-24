@@ -43,6 +43,8 @@ const getBooksByCategory = async (req, res) => {
 };
 
 
+
+
 const getBookById = async (req, res) => {
     try {
         const book = await Book.findById(req.params.id);
@@ -238,7 +240,42 @@ const searchBooksByNewest = async (req, res) => {
         res.status(500).json({ success: false, message: "Lỗi server" });
     }
 };
+const filterBooks = async (req, res) => {
+    try {
+        const { isNew, maxPrice, page = 1, limit = 10 } = req.query;
+        const pageNum = Number(page);
+        const limitNum = Number(limit);
+        const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
+        const filterConditions = {};
+        if (maxPriceNum !== undefined) {
+            filterConditions.price = { $lte: maxPriceNum };
+        }
+        const sortOptions = {};
+        if (isNew === "true") {
+            sortOptions.publication_date = -1; 
+        } else if (isNew === "false") {
+            sortOptions.publication_date = 1; 
+        }
 
+        const books = await Book.find(filterConditions)
+            .sort(sortOptions)
+            .skip((pageNum - 1) * limitNum)
+            .limit(limitNum);
+        const totalBooks = await Book.countDocuments(filterConditions);
+        const totalPages = Math.ceil(totalBooks / limitNum);
+        res.status(200).json({
+            books,
+            currentPage: pageNum,
+            totalPages,
+            totalBooks,
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: "Failed to filter books", 
+            error: error.message 
+        });
+    }
+};
 
 const getTopCategories = async (req, res) => {
     try {
@@ -291,7 +328,7 @@ module.exports = {
     addBook,
     getTopCategories,
     updateBook,
-    
+    filterBooks,
     deleteBook,
     searchBooksByTitle,
     getBooksMinStock,

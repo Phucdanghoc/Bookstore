@@ -10,7 +10,19 @@ interface EditBookModalProps {
     onUpdate: (updatedBook: BookData) => void;
 }
 
-const categorySuggestions = ["Fiction", "Non-fiction", "Science"];
+// Danh sách các thể loại mẫu
+const categoryOptions = [
+    "Fiction",
+    "Non-fiction",
+    "Science",
+    "Fantasy",
+    "Mystery",
+    "Biography",
+    "History",
+    "Romance",
+    "Thriller",
+    "Self-help"
+];
 
 export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: EditBookModalProps) {
     const [isLoading, setIsLoading] = useState(false);
@@ -29,14 +41,9 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
         publisher: "",
         publication_date: "",
     });
-    // const formattedDate = book.publication_date
-    // ? format(parse(book.publication_date, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: enGB })
-    // : "";
     const URL_API = "http://localhost:3000";
 
-
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         console.log(name, value);
 
@@ -50,22 +57,21 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
         const files = e.target.files;
         if (files) {
             const selectedImages = Array.from(files).slice(0, 5 - book.images.length);
-            setNewImages(prev => [...prev, ...selectedImages]);
+            setNewImages((prev) => [...prev, ...selectedImages]);
         }
-    };
-    const handleCategoryClick = (category: string) => {
-        setBook((prev) => ({ ...prev, category }));
     };
 
     const removeImage = (index: number) => {
-        setBook(prev => ({
+        setBook((prev) => ({
             ...prev,
-            images: prev.images.filter((_, i) => i !== index)
+            images: prev.images.filter((_, i) => i !== index),
         }));
     };
+
     const removeNewImage = (index: number) => {
-        setNewImages(prev => prev.filter((_, i) => i !== index));
-    }
+        setNewImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
     useEffect(() => {
         setNewImages([]);
     }, [book]);
@@ -73,7 +79,6 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
     useEffect(() => {
         const fetchBook = async () => {
             const response = await BookServices.getBookById(book_id as string);
-
             setBook(response);
         };
         fetchBook();
@@ -102,10 +107,11 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
             setIsLoading(false);
         }
     };
+
     const formattedDate = (publication_date: string) => {
         if (!publication_date) return "";
         return publication_date.split("T")[0];
-    }
+    };
 
     if (!isOpen) return null;
 
@@ -121,47 +127,104 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                 <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto no-scrollbar">
                     <div>
                         <label className="block text-sm font-medium">Tiêu đề</label>
-                        <input type="text" name="title" className="w-full p-3 border rounded-lg" value={book.title} onChange={handleChange} required />
+                        <input
+                            type="text"
+                            name="title"
+                            className="w-full p-3 border rounded-lg"
+                            value={book.title}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
-                    <div className="grid grid-cols-3 gap-6">    
+                    <div className="grid grid-cols-3 gap-6">
                         <div>
                             <label className="block text-sm font-medium">Tác giả</label>
-                            <input type="text" name="author" className="w-full p-3 border rounded-lg" value={book.author} onChange={handleChange} required />
+                            <input
+                                type="text"
+                                name="author"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.author}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Giá</label>
-                            <input type="number" name="price" className="w-full p-3 border rounded-lg" value={book.price} onChange={handleChange} required />
+                            <input
+                                type="number"
+                                name="price"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.price}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Giảm giá </label>
-                            <input type="number" name="discount" className="w-full p-3 border rounded-lg" value={book.discount} onChange={handleChange} required />
+                            <label className="block text-sm font-medium">Giảm giá</label>
+                            <input
+                                type="number"
+                                name="discount"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.discount}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium">Nhà xuất bản</label>
-                            <input type="text" name="publisher" className="w-full p-3 border rounded-lg" value={book.publisher} onChange={handleChange} required />
+                            <input
+                                type="text"
+                                name="publisher"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.publisher}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Thể loại</label>
-                            <input type="text" name="category" className="w-full p-3 border rounded-lg" value={book.category} onChange={handleChange} required />
-                            <div className="flex gap-2 mt-2">
-                                {categorySuggestions.map((cat) => (
-                                    <button key={cat} type="button" className="px-4 py-2 border rounded-full bg-gray-100 hover:bg-gray-200" onClick={() => handleCategoryClick(cat)}>
+                            <select
+                                name="category"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.category}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="" disabled>
+                                    Chọn thể loại
+                                </option>
+                                {categoryOptions.map((cat) => (
+                                    <option key={cat} value={cat}>
                                         {cat}
-                                    </button>
+                                    </option>
                                 ))}
-                            </div>
+                            </select>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-6">
                         <div>
                             <label className="block text-sm font-medium">Số lượng</label>
-                            <input type="number" name="stock" className="w-full p-3 border rounded-lg" value={book.stock} onChange={handleChange} required />
+                            <input
+                                type="number"
+                                name="stock"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.stock}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Số trang</label>
-                            <input type="number" name="pages" className="w-full p-3 border rounded-lg" value={book.pages} onChange={handleChange} required />
+                            <input
+                                type="number"
+                                name="pages"
+                                className="w-full p-3 border rounded-lg"
+                                value={book.pages}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Ngày xuất bản</label>
@@ -189,18 +252,25 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                     <div>
                         <label className="block text-sm font-medium">Hình ảnh</label>
                         <div className="grid grid-cols-6 gap-2">
-                            {book.images && book.images.map((image, index) => (
-                                <div key={index} className="relative w-20 h-20 border rounded-lg overflow-hidden">
-                                    <img src={`${URL_API}${image}`} alt="Preview" className="w-full h-full object-cover" />
-                                    <button onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            ))}
+                            {book.images &&
+                                book.images.map((image, index) => (
+                                    <div key={index} className="relative w-20 h-20 border rounded-lg overflow-hidden">
+                                        <img src={`${URL_API}${image}`} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => removeImage(index)}
+                                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
                             {newImages.map((image, index) => (
                                 <div key={`new-${index}`} className="relative w-20 h-20 border rounded-lg overflow-hidden">
                                     <img src={URL.createObjectURL(image)} alt="Preview" className="w-full h-full object-cover" />
-                                    <button onClick={() => removeNewImage(index)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">
+                                    <button
+                                        onClick={() => removeNewImage(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                    >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
@@ -219,11 +289,7 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                         className="w-full bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center"
                         disabled={isLoading}
                     >
-                        {isLoading ? (
-                            <Loader2 size={24} className="animate-spin" />
-                        ) : (
-                            "Cập nhật"
-                        )}
+                        {isLoading ? <Loader2 size={24} className="animate-spin" /> : "Cập nhật"}
                     </button>
                 </form>
             </div>

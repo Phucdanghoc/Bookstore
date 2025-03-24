@@ -44,7 +44,7 @@ const CheckRoleRedirect = () => {
 
     if (loading) return <p>Loading...</p>;
 
-    if (!role) return <Navigate to="/auth" replace />;
+    if (!role) return <Navigate to="/client/home" replace />; // Chuyển hướng mặc định về /client/home nếu không có vai trò
     return <Navigate to={`/${role}`} replace />;
 };
 
@@ -77,9 +77,9 @@ const router = createBrowserRouter([
         element: <ClientLayout />,
         children: [
             { index: true, element: <Navigate to="home" replace /> },
-            { path: "home", element: <HomePage /> },
-            { path: "books", element: <BooksPage /> },
-            { path: "books/:id", element: <BookDetailPage /> },
+            { path: "home", element: <HomePage /> }, // Không cần ProtectedRoute
+            { path: "books", element: <BooksPage /> }, // Không cần ProtectedRoute
+            { path: "books/:id", element: <BookDetailPage /> }, // Không cần ProtectedRoute
             {
                 element: <ProtectedRoute allowedRoles={["client"]} />,
                 children: [
@@ -93,7 +93,6 @@ const router = createBrowserRouter([
         ],
     },
 ]);
-
 
 export default function Routes() {
     return <RouterProvider router={router} />;

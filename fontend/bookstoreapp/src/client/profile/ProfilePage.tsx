@@ -3,34 +3,31 @@ import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import OrderServices from "../../services/OrderServices";
 import { OrderData } from "../../interfaces/OrderData";
 import { useNavigate, useParams } from "react-router-dom";
-import UsereServices from "../../services/UserServices";
-import UserData from "../../interfaces/UserData";
 import UserServices from "../../services/UserServices";
 import { toast } from "react-toastify";
+import UserData from "../../interfaces/UserData";
 
 const ProfilePage = () => {
     const { userId } = useParams<{ userId: string }>();
-    const [user, setUser] = useState<UserData>();
+    const [user, setUser] = useState<UserData | undefined>();
     const [orders, setOrders] = useState<OrderData[]>([]);
-    const [activeTab, setActiveTab] = useState("pending"); // Tab mặc định
-    const [isEditing, setIsEditing] = useState(false);
+    const [activeTab, setActiveTab] = useState("pending");
+    const [errors, setErrors] = useState<{ [key: string]: string }>({}); // State để lưu lỗi
     const navigate = useNavigate();
+
     useEffect(() => {
-        // Lấy thông tin user
         const fetchUserInfo = async () => {
             try {
-                const response = await UsereServices.getProfile();
+                const response = await UserServices.getProfile();
                 setUser(response.data);
             } catch (error) {
                 console.error("Lỗi khi lấy thông tin người dùng:", error);
             }
         };
 
-        // Lấy danh sách đơn hàng
         const fetchOrders = async () => {
             try {
                 const response = await OrderServices.getOrders();
-                console.log(response.data);
                 setOrders(response.data.orders);
             } catch (error) {
                 console.error("Lỗi khi lấy danh sách đơn hàng:", error);
@@ -41,25 +38,89 @@ const ProfilePage = () => {
         fetchOrders();
     }, [userId]);
 
-    if (!user) {
-        return <div className="text-center p-6 text-blue-600 text-lg">Đang tải...</div>;
-    }
+    // Hàm validate các field
+    const validateField = (name: string, value: string | undefined) => {
+        const newErrors: { [key: string]: string } = { ...errors };
+
+        switch (name) {
+            case "fullname":
+                if (!value) {
+                    newErrors[name] = "Họ tên không được để trống";
+                } else if (!/^[a-zA-Z\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]+$/.test(value)) {
+                    newErrors[name] = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+                } else {
+                    delete newErrors[name];
+                }
+                break;
+
+            case "phone":
+                if (value && !/^[0-9]{10}$/.test(value)) {
+                    newErrors[name] = "Số điện thoại phải là 10 chữ số";
+                } else {
+                    delete newErrors[name];
+                }
+                break;
+
+            case "address":
+                if (value && value.trim().length < 5) {
+                    newErrors[name] = "Địa chỉ phải có ít nhất 5 ký tự";
+                } else {
+                    delete newErrors[name];
+                }
+                break;
+
+            case "birthday":
+                if (value && new Date(value) > new Date()) {
+                    newErrors[name] = "Ngày sinh không được trong tương lai";
+                } else {
+                    delete newErrors[name];
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        setErrors(newErrors);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setUser((prev: any) => prev ? { ...prev, [name]: value } : prev);
+        validateField(name, value); // Validate ngay khi thay đổi
+    };
 
     const handleUpdateUser = async () => {
         if (!user) return;
+
+        // Validate tất cả các field trước khi submit
+        validateField("fullname", user.fullname);
+        validateField("phone", user.phone);
+        validateField("address", user.address);
+        validateField("birthday", user.birthday);
+
+        // Nếu có lỗi, không cho submit
+        if (Object.keys(errors).length > 0) {
+            toast.error("Vui lòng sửa các lỗi trước khi cập nhật");
+            return;
+        }
+
         try {
             await UserServices.updateProfile(user);
-            setUser(user); 
-            setIsEditing(false);
+            setUser(user);
             toast.success("Cập nhật thông tin thành công");
         } catch (error) {
             toast.error("Cập nhật thông tin thất bại");
             console.error("Lỗi khi cập nhật thông tin người dùng:", error);
         }
     };
+
+    if (!user) {
+        return <div className="text-center p-6 text-blue-600 text-lg">Đang tải...</div>;
+    }
+
     return (
         <div className="max-w mx-auto h-full p-6 bg-white rounded-lg shadow-lg mt-4 border border-gray-300 grid grid-cols-10 gap-6">
-
             <div className="col-span-3 bg-blue-50 p-5 rounded-lg border border-blue-400">
                 <h2 className="text-2xl font-semibold text-blue-700 flex items-center gap-2">
                     Thông tin người dùng
@@ -72,11 +133,13 @@ const ProfilePage = () => {
                             <User className="text-blue-600 w-6 h-6" />
                             <input
                                 type="text"
+                                name="fullname"
                                 className="border border-gray-300 p-2 rounded-md w-full"
-                                value={user?.fullname}
-                                onChange={(e) => setUser({ ...user, fullname: e.target.value })}
+                                value={user.fullname || ""}
+                                onChange={handleChange}
                             />
                         </div>
+                        {errors.fullname && <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>}
                     </div>
 
                     {/* Email */}
@@ -87,12 +150,11 @@ const ProfilePage = () => {
                             <input
                                 type="email"
                                 className="border border-gray-300 p-2 rounded-md w-full bg-gray-100 cursor-not-allowed"
-                                value={user?.email}
+                                value={user.email || ""}
                                 disabled={true}
                             />
                         </div>
                     </div>
-
 
                     {/* Số điện thoại */}
                     <div>
@@ -101,12 +163,14 @@ const ProfilePage = () => {
                             <Phone className="text-blue-600 w-6 h-6" />
                             <input
                                 type="text"
+                                name="phone"
                                 className="border border-gray-300 p-2 rounded-md w-full"
-                                value={user?.phone || ""}
+                                value={user.phone || ""}
                                 placeholder="Chưa cập nhật"
-                                onChange={(e) => setUser({ ...user, phone: e.target.value })}
+                                onChange={handleChange}
                             />
                         </div>
+                        {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                     </div>
 
                     {/* Địa chỉ */}
@@ -116,12 +180,14 @@ const ProfilePage = () => {
                             <MapPin className="text-blue-600 w-6 h-6" />
                             <input
                                 type="text"
+                                name="address"
                                 className="border border-gray-300 p-2 rounded-md w-full"
-                                value={user?.address || ""}
+                                value={user.address || ""}
                                 placeholder="Chưa cập nhật"
-                                onChange={(e) => setUser({ ...user, address: e.target.value })}
+                                onChange={handleChange}
                             />
                         </div>
+                        {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                     </div>
 
                     {/* Ngày sinh */}
@@ -131,13 +197,15 @@ const ProfilePage = () => {
                             <Calendar className="text-blue-600 w-6 h-6" />
                             <input
                                 type="date"
-                                min="2010-01-01"
+                                name="birthday"
+                                min="1900-01-01"
                                 max={new Date().toISOString().split("T")[0]}
                                 className="border border-gray-300 p-2 rounded-md w-full"
-                                value={user?.birthday ? new Date(user.birthday).toISOString().split("T")[0] : ""}
-                                onChange={(e) => setUser({ ...user, birthday: e.target.value })}
+                                value={user.birthday ? new Date(user.birthday).toISOString().split("T")[0] : ""}
+                                onChange={handleChange}
                             />
                         </div>
+                        {errors.birthday && <p className="text-red-500 text-sm mt-1">{errors.birthday}</p>}
                     </div>
                 </div>
 
@@ -176,9 +244,8 @@ const ProfilePage = () => {
                     </button>
                 </div>
 
-                {/* Nội dung từng tab */}
                 <div className="mt-4">
-                    {activeTab === "pending" && renderOrderList(orders.filter(order => order.payment_status === "unpaid"), navigate)}
+                    {activeTab === "pending" && renderOrderList(orders.filter(order => order.status === "pending"), navigate)}
                     {activeTab === "paid" && renderOrderList(orders.filter(order => order.payment_status === "paid"), navigate)}
                     {activeTab === "shipping" && renderOrderList(orders.filter(order => order.status === "shipping"), navigate)}
                     {activeTab === "shipped" && renderOrderList(orders.filter(order => order.status === "delivered"), navigate)}
@@ -196,17 +263,14 @@ const renderOrderList = (orders: OrderData[], navigate: any) => {
     return (
         <div className="space-y-4 h-full max-h-150 overflow-y-auto">
             {orders.map((order, index) => (
-                <div key={index} className="bg-white p-4 shadow-md rounded-lg border"
-
-
-                >
-                    <p className="text-lg font-bold  cursor-pointer hover:text-blue-600 transition"
+                <div key={index} className="bg-white p-4 shadow-md rounded-lg border">
+                    <p
+                        className="text-lg font-bold cursor-pointer hover:text-blue-600 transition"
                         title="Xem chi tiết đơn hàng"
-                        onClick={() => {
-                            navigate(`/client/orders/${order._id}`);
-                        }}
-
-                    >🛒 Mã đơn : #{order._id}</p>
+                        onClick={() => navigate(`/client/orders/${order._id}`)}
+                    >
+                        🛒 Mã đơn: #{order._id}
+                    </p>
                     <p className="text-gray-600 mt-2">
                         📅 Ngày đặt hàng: {new Date(order.order_date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </p>
@@ -227,7 +291,7 @@ const renderOrderList = (orders: OrderData[], navigate: any) => {
                         )}
                     </p>
                     <p className={`mt-2 text-gray-600 font-medium ${order.payment_status === 'paid' ? 'text-green-600' : 'text-red-600'}`}>
-                        {order.payment_status === 'paid' ? "✅ Đã thanh toán" : ButtonPayment()}
+                        {order.payment_status === 'paid' ? "✅ Đã thanh toán" : ButtonPayment(order)}
                     </p>
                 </div>
             ))}
@@ -235,27 +299,43 @@ const renderOrderList = (orders: OrderData[], navigate: any) => {
     );
 };
 
-const ButtonPayment = () => {
+const ButtonPayment = (order: OrderData) => {
+    if (order.status == "shipping") return "Thanh toán khi giao hàng";
     return (
         <div className="flex items-center justify-between w-full mt-4">
             <p className="text-gray-600 text-lg">❌ Chưa thanh toán</p>
             <div className="flex gap-4">
-                <button
-                    className="bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
-                >
-                    Thanh toán
+                <button onClick={
+                    () => {
+                        OrderServices.repaymentOrder(order._id).then((res) => {
+                            if (res.status == 200) {
+                                if (res.data.VNPUrl) {
+                                    location.href = res.data.VNPUrl;
+                                }else {
+                                    toast.error(res.data.message);
+                                }
+                            }else {
+                                toast.error(res.data.message);
+                            }
+                        })
+                    }
+                } className="bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition">
+                  Tiếp tục thanh toán
                 </button>
-                <button
-                    className="bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 transition"
-                >
+                <button onClick={() => {
+                    OrderServices.canceleOrder(order._id).then((res) => {
+                        if (res.status == 200) {
+                            toast.success("Đã hủy đơn hàng");
+                        }else {
+                            toast.error(res.data.message);
+                        }
+                    })
+                 }} className="bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 transition">
                     Hủy đơn hàng
                 </button>
             </div>
         </div>
     );
 };
-
-
-
 
 export default ProfilePage;

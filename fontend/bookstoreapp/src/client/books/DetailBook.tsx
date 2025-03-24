@@ -186,7 +186,7 @@ const BookDetailPage = () => {
                         </button>
                         <span className="text-2xl font-semibold text-blue-600">{quantity}</span>
                         <button className="w-10 h-10 flex items-center justify-center bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                            onClick={() => setQuantity((prev) => prev + 1)}>
+                            onClick={() => book!.stock > quantity + 1 ? setQuantity((prev) => prev + 1) : toast.error("Số lượng tối đa")} >
                             <Plus size={20} />
                         </button>
                     </div>

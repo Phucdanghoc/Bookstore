@@ -119,8 +119,8 @@ const OrderManager = () => {
                     <option value="">Tất cả</option>
                     <option value="pending">Chờ xác nhận</option>
                     <option value="processing">Đang xử lý</option>
-                    <option value="shipped">Đã giao</option>
-                    <option value="completed">Hoàn thành</option>
+                    <option value="shipping">Đang giao</option>
+                    <option value="delivered">Hoàn thành</option>
                     <option value="cancelled">Đã hủy</option>
                 </select>
             </div>
@@ -132,7 +132,7 @@ const OrderManager = () => {
                             <th className="px-6 py-3 border-b text-left">Khách hàng</th>
                             <th className="px-6 py-3 border-b text-left">Tổng tiền</th>
                             <th className="px-6 py-3 border-b text-left">Trạng thái</th>
-
+                            <th className="px-6 py-3 border-b text-left">Thời gian</th>
                             <th className="px-6 py-3 border-b text-left">Hành động</th>
                         </tr>
                     </thead>
@@ -153,9 +153,10 @@ const OrderManager = () => {
                                 <td className={`px-6 py-4 font-bold ${order.status === "Completed" ? "text-green-600" : "text-red-600"}`}>
                                     {formatStatus(order.status)}
                                 </td>
+                                <td className="px-6 py-4">{new Date(order.order_date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}</td>
                                 <td className="px-6 py-4 flex gap-2">
                                     {order.status == 'delivered' && (
-                                        <button className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center gap-1">
+                                        <button onClick={() => window.open(`/admin/orders/${order._id}`, "_blank")} className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 flex items-center gap-1">
                                             <Eye size={16} />
                                             Xem đơn hàng
                                         </button>

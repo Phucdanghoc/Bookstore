@@ -124,7 +124,6 @@ const addOrder = async (req, res) => {
         const { tokenCheckout, contactNumber, shippingAddress, paymentMethod, customerName, noteOrder } = req.body;
         const payload = TokenService.verifyToken(tokenCheckout);
         const userId = req.user.id;
-        console.log(payload);
 
         if (!payload || payload.userId !== userId) {
             return res.status(400).json({ message: "Token không hợp lệ." });
@@ -135,80 +134,95 @@ const addOrder = async (req, res) => {
         if (!selectedItems.length) {
             return res.status(404).json({ message: "Không có sản phẩm nào được chọn." });
         }
-        console.log("Cart items", selectedItems);
-        console.log("Voucher ID", voucherCode);
 
-        const voucher = await Voucher.findById(voucherCode);
+        let voucher = voucherCode ? await Voucher.findOne({ _id: voucherCode }) : null;
         const total = selectedItems.reduce((acc, item) => acc + item.quantity * item.book.price, 0);
-        const orderItems = selectedItems.map(item => {
-            return new OrderItem({
-                book: item.book._id,
-                quantity: item.quantity,
-                price: item.quantity * item.book.price,
-            });
-        });
-        await OrderItem.insertMany(orderItems);
-        for (const item of selectedItems) {
-            await CartItem.findByIdAndDelete(item._id);
-        }
-        console.log("Voucher", voucher);
-        
+        const orderItems = selectedItems.map(item => ({
+            book: item.book._id,
+            quantity: item.quantity,
+            price: item.quantity * item.book.price,
+        }));
+
+        const savedOrderItems = await OrderItem.insertMany(orderItems);
+        await CartItem.deleteMany({ _id: { $in: cartItems } });
+
         const newOrder = new Order({
             user: userId,
-            order_items: orderItems.map(item => item._id),
+            order_items: savedOrderItems.map(item => item._id),
             total,
             payment_method: paymentMethod,
             shipping_address: shippingAddress,
-            customerName: customerName,
-            noteOrder: noteOrder,
+            customerName,
+            noteOrder,
             contact_number: contactNumber,
             discount: voucher ? voucher.discount : 0,
+            status: "pending",
+            payment_status: "unpaid",
         });
+
         const savedOrder = await newOrder.save();
         await StockService.updateStock(selectedItems);
         await StockService.removeCartItem(cartItems, userId);
-        if (paymentMethod == 'vnpay') {
+
+        if (paymentMethod === "vnpay") {
             const paymentUrl = await PaymentService.generatePaymentUrl({
                 amount: savedOrder.total - savedOrder.discount,
                 orderInfo: `${savedOrder._id}`,
-                bankCode: 'NCB',
+                bankCode: "NCB",
             }, req);
             return res.status(201).json({ message: "Đặt hàng thành công", VNPUrl: paymentUrl });
+        }else{
+            savedOrder.status = "shipping";
+            savedOrder.payment_status = "cod";
+            await savedOrder.save();
+            res.status(201).json({ message: "Đặt hàng thành công", order: savedOrder });
         }
-        savedOrder.status = 'shipping';
-        savedOrder.payment_status = 'cod';
         await savedOrder.save();
-        res.status(201).json({ message: "Đặt hàng thành công", order: savedOrder });
+        res.status(400).json({ message: "Thanh toán bị gián đoạn", order: savedOrder });
+       
     } catch (error) {
         console.error("Lỗi khi đặt hàng:", error);
         res.status(500).json({ message: "Lỗi máy chủ" });
     }
-}
+};
 
 const vnPayReturn = async (req, res) => {
     try {
-        const { vnp_SecureHash } = req.query;
-        console.log("vnp_SecureHash", vnp_SecureHash);
+        const { vnp_SecureHash, vnp_ResponseCode } = req.query;
         const vpnReturn = await PaymentService.verifyReturnUrl(req.query);
         if (!vpnReturn) {
-            return res.status(400).json({ message: "Invalid request" });
-        } else {
-            const order = await Order.findById(vpnReturn.vnp_OrderInfo);
-            if (!order) {
-                return res.status(404).json({ message: "Order not found" });
-            }
-            order.status = 'shipping';
-            order.payment_status = 'paid';
+            return res.status(400).json({ message: "Yêu cầu không hợp lệ" });
+        }
+
+        const order = await Order.findById(vpnReturn.vnp_OrderInfo);
+        if (!order) {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+        }
+
+        if (vnp_ResponseCode === "00") {
+            order.status = "shipping";
+            order.payment_status = "paid";
             order.payment_date = new Date();
             order.payment_code = vpnReturn.vnp_BankTranNo;
             await order.save();
-            res.redirect(`http://localhost:5173/client/payment-result?order_id=${order._id}`);
+            res.redirect(`http://localhost:5173/client/payment-result?order_id=${order._id}&status=success`);
+        } else {
+            order.status = "pending";
+            order.payment_status = "unpaid";
+            await order.save();
+            res.redirect(`http://localhost:5173/client/payment-result?order_id=${order._id}&status=failed&error=${vnp_ResponseCode}`);
         }
     } catch (error) {
         console.error("Lỗi khi xử lý thanh toán:", error);
-        res.status(500).json({ message: "Lỗi máy chủ" });
+        const order = await Order.findById(req.query.vnp_OrderInfo);
+        if (order) {
+            order.status = "pending";
+            order.payment_status = "unpaid";
+            await order.save();
+        }
+        res.redirect(`http://localhost:5173/client/payment-result?order_id=${req.query.vnp_OrderInfo}&status=error&error=system`);
     }
-}
+};
 const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.body;
@@ -272,37 +286,49 @@ const repayVNPAY = async (req, res) => {
     try {
         const { id } = req.params;
         const { payment_status } = req.body;
-        if (payment_status !== 'paid') {
-            return res.status(400).json({ message: 'Invalid payment status' });
-        }
-        const order = await Order
-            .findById(id);
+
+     
+        const order = await Order.findById(id);
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
         }
-        if (order.payment_status === 'paid') {
-            return res.status(400).json({ message: 'Order has been paid' });
+        if (order.payment_status === "paid") {
+            return res.status(400).json({ message: "Đơn hàng đã được thanh toán" });
         }
-        if (order.status === 'cancelled') {
-            return res.status(400).json({ message: 'Order has been cancelled' });
+        if (order.status === "cancelled") {
+            return res.status(400).json({ message: "Đơn hàng đã bị hủy" });
         }
-        if (order.payment_method == 'vnpay') {
+        if (order.status === "delivered") {
+            return res.status(400).json({ message: "Đơn hàng đã được giao, không thể thanh toán lại" });
+        }
+        if (order.payment_method === "vnpay") {
             const paymentUrl = await PaymentService.generatePaymentUrl({
-                amount: order.total - order.discount,
-                orderInfo: `Thanh toán đơn hàng #${order._id}`,
-                bankCode: 'NCB',
+                amount: order.total - (order.discount || 0), 
+                orderInfo: `#${order._id}`,
+                bankCode: "NCB",
             }, req);
-            res.status(201).json({ message: "Đặt hàng thành công", VNPUrl: paymentUrl }); 
+            return res.status(200).json({ 
+                message: "Tạo URL thanh toán lại thành công", 
+                VNPUrl: paymentUrl 
+            });
+        } else if (order.payment_method === "cod") {
+            return res.status(400).json({ 
+                message: "Đơn hàng này sử dụng phương thức COD, không thể thanh toán lại bằng VNPay" 
+            });
+        } else {
+            return res.status(400).json({ 
+                message: "Phương thức thanh toán không được hỗ trợ để thanh toán lại" 
+            });
         }
-        res.status(200).json({
-            message: `Đơn hàng ${order._id} sẽ được thanh toán khi nhận hàng`,
-            order: order
+    } catch (error) {
+        console.error("Lỗi khi xử lý thanh toán lại:", error);
+        res.status(500).json({ 
+            message: "Lỗi máy chủ khi xử lý thanh toán lại", 
+            error: error.message 
         });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Failed to update order', error: error.message });
-    }
 };
+
 const checkPayment = async (req, res) => {
     try {
         const { orderId } = req.query;

@@ -75,6 +75,13 @@ class BookService {
     });
     return response.data;
   }
+  static async filterBooks(isNew: boolean, maxPrice: number, page = 1, limit = 10) {
+    const response = await axiosInstance.get(`/filter?isNew=${isNew}&maxPrice=${maxPrice}`, 
+    {
+      params: { page, limit },
+    });
+    return response.data;
+  }
 }
 
 export default BookService;

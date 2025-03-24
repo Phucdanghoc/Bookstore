@@ -24,7 +24,9 @@ const OrderServices = {
     },
 
     async getOrders() {
-        return await axios.get(`${API_URL}/orders`);
+        return await axios.get(`${API_URL}/orders`, {
+            params : { page: 1, limit: 100 },
+        });
     },
     async getOrderById(orderId: string) {
         return await axios.get(`${API_URL}/orders/${orderId}`);
@@ -37,7 +39,10 @@ const OrderServices = {
             params: { limit, page },
         });
         return response.data;
-    }
+    },
+    async repaymentOrder(orderId: string) {
+        return await axios.put(`${API_URL}/orders/repayment/${orderId}`);
+    },
 };
 
 export default OrderServices;
