@@ -83,7 +83,7 @@ const BookDetailPage = () => {
     const fetchRelatedBooks = async (category: string) => {
         try {
             const response = await BookService.getBookByCategory(category);
-            setRelatedBooks(response.books);
+            setRelatedBooks(response.books.filter((book : BookData) => book._id !== id));
         } catch (err) {
             console.error("Lỗi khi lấy danh sách sách cùng thể loại:", err);
         }
@@ -306,7 +306,7 @@ const BookDetailPage = () => {
                 <div className="flex overflow-x-auto gap-4 p-4">
                     {relatedBooks.length > 0 && relatedBooks.map((relatedBook) => (
                         <div key={relatedBook._id} className="w-[200px] min-w-[200px] p-3 bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg transition transform hover:scale-105"
-                            onClick={() => navigate(`/client/books/${relatedBook._id}`)}>
+                            onClick={() => window.open(`/client/books/${relatedBook._id}`, '_blank')}>
                             <img src={`${API_URL}${relatedBook.images[0]}`} alt={relatedBook.title} className="w-full h-[250px] object-cover rounded-lg" />
                             <h3 className="text-lg font-semibold text-gray-800 mt-2">{relatedBook.title}</h3>
                             <p className="text-blue-600 font-medium">{relatedBook.price.toLocaleString()} VNĐ</p>

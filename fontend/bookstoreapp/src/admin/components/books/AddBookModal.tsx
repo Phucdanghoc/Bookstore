@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X, Plus, Trash2, Loader2 } from "lucide-react";
 import { BookData } from "../../../interfaces/BookData";
 import BookServices from "../../../services/BookServices";
@@ -9,7 +9,6 @@ interface AddBookModalProps {
   onSubmit: (bookData: BookData) => void;
 }
 
-// Danh sách các thể loại mẫu
 const categoryOptions = [
   "Fiction",
   "Non-fiction",
@@ -34,11 +33,13 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
     stock: 0,
     description: "",
     pages: 0,
-    images: [],
+    images: [], // Lưu URL tạm thời để hiển thị
     publisher: "",
     publication_date: "",
     discount: 0,
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]); // Lưu danh sách file gốc
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -51,10 +52,23 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const newImages = Array.from(files)
-        .slice(0, 5 - book.images.length)
-        .map((file) => URL.createObjectURL(file));
-      setBook((prev) => ({ ...prev, images: [...prev.images, ...newImages] }));
+      const newFiles = Array.from(files).filter((file) => 
+        !imageFiles.some((existingFile) => existingFile.name === file.name) // Loại bỏ file trùng tên
+      );
+      const remainingSlots = 5 - imageFiles.length;
+      const filesToAdd = newFiles.slice(0, remainingSlots);
+
+      const newImagePreviews = filesToAdd.map((file) => URL.createObjectURL(file));
+      setBook((prev) => ({
+        ...prev,
+        images: [...prev.images, ...newImagePreviews],
+      }));
+      setImageFiles((prev) => [...prev, ...filesToAdd]);
+
+      // Reset input để cho phép chọn lại file nếu cần
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -63,6 +77,9 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    // Thu hồi URL để tránh memory leak
+    URL.revokeObjectURL(book.images[index]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,14 +100,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
       };
 
       const newBook = await BookServices.createBook(bookData);
-      if (book.images.length > 0) {
-        const imageFiles = await Promise.all(
-          book.images.map(async (image) => {
-            const res = await fetch(image);
-            const blob = await res.blob();
-            return new File([blob], `image-${Date.now()}.png`, { type: blob.type });
-          })
-        );
+      if (imageFiles.length > 0) {
         const response = await BookServices.uploadImages(newBook._id, imageFiles);
         if (response.success) {
           console.log("📸 Images Uploaded");
@@ -98,7 +108,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
           console.error("🚨 Error:", response);
         }
       }
-      onSubmit(newBook); // Gọi onSubmit để thông báo cho component cha
+      onSubmit(newBook);
       onClose();
     } catch (error) {
       console.error("🚨 Error:", error);
@@ -109,6 +119,7 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
 
   useEffect(() => {
     if (!isOpen) {
+      // Reset state khi đóng modal
       setBook({
         _id: "",
         title: "",
@@ -123,6 +134,9 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
         discount: 0,
         publication_date: "",
       });
+      setImageFiles([]);
+      // Thu hồi tất cả URL tạm thời
+      book.images.forEach((image) => URL.revokeObjectURL(image));
     }
   }, [isOpen]);
 
@@ -243,7 +257,6 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
                 value={book.publication_date}
                 onChange={handleChange}
                 required
-                placeholder="YYYY-MM-DD"
               />
             </div>
           </div>
@@ -274,7 +287,14 @@ export default function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModal
               {book.images.length < 5 && (
                 <label className="w-20 h-20 border-2 border-dashed flex items-center justify-center cursor-pointer">
                   <Plus size={24} className="text-gray-400" />
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} multiple />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                    multiple
+                    ref={fileInputRef}
+                  />
                 </label>
               )}
             </div>

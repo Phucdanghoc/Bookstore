@@ -93,6 +93,7 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
             if (newImages.length > 0) {
                 const imageFiles = await Promise.all(
                     newImages.map(async (file) => {
+                        await new Promise((resolve) => setTimeout(resolve, 1000));
                         return new File([file], `image-${Date.now()}.png`, { type: file.type });
                     })
                 );
@@ -257,6 +258,7 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                                     <div key={index} className="relative w-20 h-20 border rounded-lg overflow-hidden">
                                         <img src={`${URL_API}${image}`} alt="Preview" className="w-full h-full object-cover" />
                                         <button
+                                            type="button"
                                             onClick={() => removeImage(index)}
                                             className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                         >
@@ -268,6 +270,7 @@ export default function EditBookModal({ isOpen, onClose, book_id, onUpdate }: Ed
                                 <div key={`new-${index}`} className="relative w-20 h-20 border rounded-lg overflow-hidden">
                                     <img src={URL.createObjectURL(image)} alt="Preview" className="w-full h-full object-cover" />
                                     <button
+                                        type="button"
                                         onClick={() => removeNewImage(index)}
                                         className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                     >

@@ -69,7 +69,7 @@ export default function HomePage() {
                     >
                         <div className="w-[250px] h-[400px] flex justify-center">
                             <img
-                                src={currentBook.images[0] || "https://cdn0.fahasa.com/media/catalog/product/1/4/1450-4141-9057.jpg"}
+                                src={`${URL_API}${currentBook.images[0]}`}
                                 alt={currentBook.title}
                                 className="w-full h-full object-cover rounded-lg shadow-lg"
                             />
@@ -125,7 +125,7 @@ export default function HomePage() {
                     {books.map((book) => (
                         <div key={book._id} className="bg-white shadow-lg rounded-lg p-4 hover:scale-105 transition-transform" onClick={() => navigate(`/client/books/${book._id}`)}>
                             <img
-                                src={`${URL_API}${book.images[0]}` || "https://cdn0.fahasa.com/media/catalog/product/1/4/1450-4141-9057.jpg"}
+                                src={`${URL_API}${book.images[0]}`}
                                 alt={book.title}
                                 className="w-full h-[250px] object-cover rounded-lg"
                             />

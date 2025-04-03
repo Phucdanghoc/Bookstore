@@ -1,9 +1,10 @@
 const Book = require('../models/Book');
+
 const uploadImageBook = async (req, res) => {
     try {
         const { id } = req.params;
 
-        if (!req.files || req.files.length === 0) {
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
@@ -11,19 +12,22 @@ const uploadImageBook = async (req, res) => {
         if (!book) {
             return res.status(404).json({ message: 'Book not found' });
         }
-
         const imagePaths = req.files.map(file => `/uploads/${file.filename}`);
-        book.images.push(...imagePaths);
+        
+        book.images = [...book.images, ...imagePaths];
         await book.save();
 
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: 'Images uploaded successfully', 
             images: book.images 
         });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to upload images', error: error.message });
+        console.error('Error uploading images:', error); 
+        return res.status(500).json({ 
+            message: 'Failed to upload images', 
+            error: error.message 
+        });
     }
 };
 
-
-module.exports =  { uploadImageBook };
+module.exports = { uploadImageBook };

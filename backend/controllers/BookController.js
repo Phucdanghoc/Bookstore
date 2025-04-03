@@ -153,9 +153,7 @@ const updateBook = async (req, res) => {
         });
         req.body.images = imageUrls;
         console.log(req.body);
-        
         const updatedBook = await Book.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-
         res.status(200).json(updatedBook);
     } catch (error) {
         res.status(500).json({ message: 'Failed to update book', error: error.message });

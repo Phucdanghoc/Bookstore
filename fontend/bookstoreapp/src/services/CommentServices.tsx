@@ -1,5 +1,4 @@
 import axios from "axios";
-import { he } from "date-fns/locale";
 
 
 const URL_API = "http://localhost:3000/api";

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import BookCard from "../components/BookCard";
 import { BookData, CategoriesData } from "../../interfaces/BookData";
 import axios from "axios";
@@ -8,7 +8,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { toast } from "react-toastify";
 
 const URL_API = "http://localhost:3000/api/books";
-
+const API_URL = "http://localhost:3000";
 export default function BooksPage() {
     useDocumentTitle("Danh sách sách");
     const [searchTerm, setSearchTerm] = useState("");
@@ -20,8 +20,11 @@ export default function BooksPage() {
         _id: "Tất cả",
         count: 0,
     }]);
-    const [sortBy, setSortBy] = useState(""); // "" là không sắp xếp, "newest" hoặc "oldest"
-    const [priceRange, setPriceRange] = useState(1000000); // Chỉ giữ một giá trị max
+    const [sortBy, setSortBy] = useState("");
+    const [priceRange, setPriceRange] = useState(1000000);
+    const [suggestions, setSuggestions] = useState<BookData[]>([]); // State cho gợi ý
+    const [showSuggestions, setShowSuggestions] = useState(false); // Hiển thị dropdown
+    const searchRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const searchByCategory = async () => {
@@ -45,6 +48,7 @@ export default function BooksPage() {
         searchByCategory();
     }, [selectedCategory, currentPage]);
 
+    // Lấy danh mục
     useEffect(() => {
         axios.get(`${URL_API}/top-categories?top=8`)
             .then(response => {
@@ -53,17 +57,54 @@ export default function BooksPage() {
             .catch(error => console.error("Lỗi lấy categories:", error));
     }, []);
 
+    // Lấy gợi ý khi search term thay đổi
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (searchTerm.trim() === "") {
+                setSuggestions([]);
+                setShowSuggestions(false);
+                return;
+            }
+            try {
+                const response = await BookService.searchBooks(searchTerm, 1, 5); // Lấy 5 gợi ý
+                setSuggestions(response.books);
+                setShowSuggestions(true);
+            } catch (error) {
+                console.error("Lỗi khi lấy gợi ý:", error);
+            }
+        };
+        fetchSuggestions();
+    }, [searchTerm]);
+
+    // Đóng dropdown khi click ra ngoài
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const handleSearch = () => {
         const searchByTitle = async () => {
             try {
                 const response = await BookService.searchBooks(searchTerm, currentPage, 10);
                 setBooks(response.books);
                 setTotalPages(response.totalPages);
+                setShowSuggestions(false); // Ẩn gợi ý sau khi tìm kiếm
             } catch (error) {
                 console.error("Lỗi khi tìm kiếm sách:", error);
             }
         };
         searchByTitle();
+    };
+
+    const handleSelectSuggestion = (book: BookData) => {
+        setSearchTerm(book.title);
+        setShowSuggestions(false);
+        handleSearch();
     };
 
     const handlePrevPage = () => {
@@ -100,16 +141,12 @@ export default function BooksPage() {
             <div className="flex gap-4">
                 <div className="w-2/12 p-4 bg-gray-100 rounded-lg flex flex-col h-full mt-[100px]">
                     <h3 className="text-lg font-semibold mb-4">Lọc theo</h3>
-
-                    {/* Nút áp dụng */}
                     <button
                         onClick={applyFilters}
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all ease-in-out duration-300 mb-4"
                     >
                         Áp dụng
                     </button>
-
-                    {/* Khoảng giá */}
                     <div className="mb-4">
                         <h4 className="font-semibold">Khoảng giá</h4>
                         <input
@@ -124,8 +161,6 @@ export default function BooksPage() {
                             Giá tối đa: {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(priceRange)}
                         </p>
                     </div>
-
-                    {/* Lọc theo ngày xuất bản */}
                     <div className="mb-4">
                         <h4 className="font-semibold">Lọc theo ngày xuất bản</h4>
                         <div className="flex items-center gap-2">
@@ -149,8 +184,6 @@ export default function BooksPage() {
                             <label htmlFor="oldest">Cũ nhất</label>
                         </div>
                     </div>
-
-                    {/* Danh mục sách */}
                     <div className="mb-4 flex-grow">
                         <h4 className="font-semibold mb-2">Danh mục</h4>
                         <ul className="space-y-2">
@@ -168,16 +201,16 @@ export default function BooksPage() {
                     </div>
                 </div>
 
-                {/* Book List Column */}
                 <div className="w-10/12 p-2">
-                    <div className="flex flex-col items-center gap-4 mb-6">
-                        <div className="flex gap-4 w-full max-w-2xl">
+                    <div className="flex flex-col items-center gap-4 mb-6" ref={searchRef}>
+                        <div className="flex gap-4 w-full max-w-2xl relative">
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm sách..."
                                 className="flex-grow border p-3 bg-gray-100 rounded-lg transition-all ease-in-out duration-300 hover:border-blue-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                             />
                             <button
                                 onClick={handleSearch}
@@ -185,6 +218,25 @@ export default function BooksPage() {
                             >
                                 <Search size={20} />
                             </button>
+
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute top-full left-0 w-full max-w-2xl bg-white border rounded-lg shadow-lg mt-2 z-10 max-h-96 overflow-y-auto">
+                                    {suggestions.map((book) => (
+                                        <div
+                                            key={book._id}
+                                            className="flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                            onClick={() => handleSelectSuggestion(book)}
+                                        >
+                                            <img
+                                                src={`${API_URL}${book.images[0]}` || "https://via.placeholder.com/50"}
+                                                alt={book.title}
+                                                className="w-12 h-12 object-cover rounded"
+                                            />
+                                            <span className="text-sm font-medium truncate">{book.title}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -194,7 +246,6 @@ export default function BooksPage() {
                         ))}
                     </div>
 
-                    {/* Pagination */}
                     <div className="flex justify-center items-center mt-6 gap-4">
                         <button
                             onClick={handlePrevPage}
