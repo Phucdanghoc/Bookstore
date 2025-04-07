@@ -129,6 +129,10 @@ const addOrder = async (req, res) => {
             return res.status(400).json({ message: "Token không hợp lệ." });
         }
 
+        if (!contactNumber || !shippingAddress || !paymentMethod) {
+            return res.status(400).json({ message: "Thông tin khách hàng không hợp lệ." });
+        }
+
         const { cartItems, voucherCode } = payload;
         const selectedItems = await CartItem.find({ _id: { $in: cartItems } }).populate("book").exec();
         if (!selectedItems.length) {
@@ -171,18 +175,15 @@ const addOrder = async (req, res) => {
                 bankCode: "NCB",
             }, req);
             return res.status(201).json({ message: "Đặt hàng thành công", VNPUrl: paymentUrl });
-        }else{
+        } else {
             savedOrder.status = "shipping";
             savedOrder.payment_status = "cod";
             await savedOrder.save();
-            res.status(201).json({ message: "Đặt hàng thành công", order: savedOrder });
+            return res.status(201).json({ message: "Đặt hàng thành công", order: savedOrder });
         }
-        await savedOrder.save();
-        res.status(400).json({ message: "Thanh toán bị gián đoạn", order: savedOrder });
-       
     } catch (error) {
         console.error("Lỗi khi đặt hàng:", error);
-        res.status(500).json({ message: "Lỗi máy chủ" });
+        return res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
 

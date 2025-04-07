@@ -6,6 +6,7 @@ import VoucherData from "../../interfaces/VoucherData";
 import { ShoppingCart } from "lucide-react";
 import { CheckoutData } from "../../interfaces/OrderData";
 import OrderServices from "../../services/OrderServices";
+import { toast } from "react-toastify";
 
 const CheckoutPage = () => {
     const [searchParams] = useSearchParams();
@@ -91,8 +92,11 @@ const CheckoutPage = () => {
                 }else {
                     navigate("/client/payment-result?order_id=" + response.data.order._id);
                 }
+            }else{
+                toast.error(response.data.message);
             }
         } catch (error) {
+            toast.error("Thông tin của người dùng chưa chính xác");
             console.error("Lỗi khi đặt hàng:", error);
         }
     };

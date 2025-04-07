@@ -48,7 +48,6 @@ export default function BooksPage() {
         searchByCategory();
     }, [selectedCategory, currentPage]);
 
-    // Lấy danh mục
     useEffect(() => {
         axios.get(`${URL_API}/top-categories?top=8`)
             .then(response => {
